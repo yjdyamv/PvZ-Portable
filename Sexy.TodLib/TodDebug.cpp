@@ -207,5 +207,5 @@ void TodAssertInitForApp()
 	strcpy(gLogFileName + strlen(gLogFileName), "log.txt");
 	TOD_ASSERT(strlen(gLogFileName) < MAX_PATH);
 
-	TodLog("Started %s\n", (uint64_t)time(NULL));
+	TodLog("Started %d\n", (uint64_t)time(NULL));
 }
