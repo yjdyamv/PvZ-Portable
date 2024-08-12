@@ -9,6 +9,9 @@ SDLSoundManager::SDLSoundManager()
 	mInitializedMixer = false;
 	mLastReleaseTick = 0;
 	mMasterVolume = 1.0;
+	mMixerFreq = 0;
+	mMixerFormat = 0;
+	mMixerChannels = 0;
 
 	int i;
 
@@ -34,6 +37,8 @@ SDLSoundManager::SDLSoundManager()
 		return;
 	}
 	mInitializedMixer = true;
+
+	Mix_QuerySpec(&mMixerFreq, &mMixerFormat, &mMixerChannels);
 }
 
 SDLSoundManager::~SDLSoundManager()

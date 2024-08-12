@@ -23,6 +23,9 @@ protected:
 	SDLSoundInstance*		mPlayingSounds[MAX_CHANNELS];
 	double					mMasterVolume;
 	uint64_t				mLastReleaseTick;
+	int						mMixerFreq;
+	uint16_t				mMixerFormat;
+	int						mMixerChannels;
 
 protected:
 	int						FindFreeChannel();
