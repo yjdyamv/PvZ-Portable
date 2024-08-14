@@ -1,13 +1,10 @@
 #define XMD_H
 
-#define NOMINMAX 1
-#include <windows.h>
+#include "Common.h"
 #include "ImageLib.h"
 #include "png.h"
 #include <math.h>
-#include <tchar.h>
 #include "paklib/PakInterface.h"
-#include "Common.h"
 
 extern "C"
 {
@@ -1006,6 +1003,42 @@ bool ImageLib::WriteTGAImage(const std::string& theFileName, Image* theImage)
 	return true;
 }
 
+#ifndef _WIN32
+typedef struct tagBITMAPFILEHEADER {
+    uint16_t bfType;
+    unsigned int bfSize;
+    uint16_t bfReserved1;
+    uint16_t bfReserved2;
+    unsigned int bfOffBits;
+} BITMAPFILEHEADER, *LPBITMAPFILEHEADER, *PBITMAPFILEHEADER;
+
+typedef struct tagBITMAPINFOHEADER {
+    unsigned int biSize;
+    int biWidth;
+    int biHeight;
+    uint16_t biPlanes;
+    uint16_t biBitCount;
+    unsigned int biCompression;
+    unsigned int biSizeImage;
+    int biXPelsPerMeter;
+    int biYPelsPerMeter;
+    unsigned int biClrUsed;
+    unsigned int biClrImportant;
+} BITMAPINFOHEADER, *LPBITMAPINFOHEADER, *PBITMAPINFOHEADER;
+
+using Compression = enum {
+    BI_RGB = 0x0000,
+    BI_RLE8 = 0x0001,
+    BI_RLE4 = 0x0002,
+    BI_BITFIELDS = 0x0003,
+    BI_JPEG = 0x0004,
+    BI_PNG = 0x0005,
+    BI_CMYK = 0x000B,
+    BI_CMYKRLE8 = 0x000C,
+    BI_CMYKRLE4 = 0x000D
+};
+#endif
+
 bool ImageLib::WriteBMPImage(const std::string& theFileName, Image* theImage)
 {
 	FILE* aFile = fopen(theFileName.c_str(), "wb");
@@ -1033,7 +1066,7 @@ bool ImageLib::WriteBMPImage(const std::string& theFileName, Image* theImage)
 
 	fwrite(&aFileHeader,sizeof(aFileHeader),1,aFile);
 	fwrite(&aHeader,sizeof(aHeader),1,aFile);
-	DWORD *aRow = theImage->mBits + (theImage->mHeight-1)*theImage->mWidth;
+	ulong *aRow = theImage->mBits + (theImage->mHeight-1)*theImage->mWidth;
 	int aRowSize = theImage->mWidth*4;
 	(void)aRowSize; // Unused
 	for (int i=0; i<theImage->mHeight; i++, aRow-=theImage->mWidth)
@@ -1246,22 +1279,22 @@ Image* ImageLib::GetImage(const std::string& theFilename, bool lookForAlphaImage
 
 	Image* anImage = NULL;
 
-	if ((anImage == NULL) && ((stricmp(anExt.c_str(), ".tga") == 0) || (anExt.length() == 0)))
+	if ((anImage == NULL) && ((strcasecmp(anExt.c_str(), ".tga") == 0) || (anExt.length() == 0)))
 		anImage = GetTGAImage(aFilename + ".tga");
 
-	if ((anImage == NULL) && ((stricmp(anExt.c_str(), ".jpg") == 0) || (anExt.length() == 0)))
+	if ((anImage == NULL) && ((strcasecmp(anExt.c_str(), ".jpg") == 0) || (anExt.length() == 0)))
 		anImage = GetJPEGImage(aFilename + ".jpg");
 
-	if ((anImage == NULL) && ((stricmp(anExt.c_str(), ".png") == 0) || (anExt.length() == 0)))
+	if ((anImage == NULL) && ((strcasecmp(anExt.c_str(), ".png") == 0) || (anExt.length() == 0)))
 		anImage = GetPNGImage(aFilename + ".png");
 
-	if ((anImage == NULL) && ((stricmp(anExt.c_str(), ".gif") == 0) || (anExt.length() == 0)))
+	if ((anImage == NULL) && ((strcasecmp(anExt.c_str(), ".gif") == 0) || (anExt.length() == 0)))
 		anImage = GetGIFImage(aFilename + ".gif");
 
-	if ((anImage == NULL) && (stricmp(anExt.c_str(), ".j2k") == 0))
+	if ((anImage == NULL) && (strcasecmp(anExt.c_str(), ".j2k") == 0))
 		unreachable(); // There are no JPEG2000 files in the project
 		//anImage = GetJPEG2000Image(aFilename + ".j2k");
-	if ((anImage == NULL) && (stricmp(anExt.c_str(), ".jp2") == 0))
+	if ((anImage == NULL) && (strcasecmp(anExt.c_str(), ".jp2") == 0))
 		unreachable(); // There are no JPEG2000 files in the project
 		//anImage = GetJPEG2000Image(aFilename + ".jp2");
 

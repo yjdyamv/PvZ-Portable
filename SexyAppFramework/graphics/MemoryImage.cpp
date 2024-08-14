@@ -199,7 +199,7 @@ void MemoryImage::NormalDrawLine(double theStartX, double theStartY, double theE
 	ulong aGRoundAdd = aGMask >> 1;
 	ulong aBRoundAdd = aBMask >> 1;
 	
-	DWORD *aSurface = GetBits();
+	ulong *aSurface = GetBits();
 
 	if (true)//(mLockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount == 32)
 	{
@@ -497,7 +497,7 @@ void MemoryImage::AdditiveDrawLine(double theStartX, double theStartY, double th
 	//ulong aBRoundAdd = aBMask >> 1;
 
 	uchar* aMaxTable = mApp->mAdd8BitMaxTable;
-	DWORD *aSurface = GetBits();
+	ulong *aSurface = GetBits();
 	
 	if (true)//(mLockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount == 32)
 	{
@@ -1286,7 +1286,7 @@ ulong* MemoryImage::GetBits()
 		}
 		else if ((mD3DData == NULL) || (!mApp->mGLInterface->RecoverBits(this)))
 		{
-			ZeroMemory(mBits, aSize*sizeof(ulong));
+			memset(mBits, 0, aSize*sizeof(ulong));
 		}
 	}	
 
@@ -1794,7 +1794,7 @@ void MemoryImage::BltMatrix(Image* theImage, float x, float y, const SexyMatrix3
 {
 	theImage->mDrawn = true;
 
-	DWORD *aSurface = GetBits();
+	ulong *aSurface = GetBits();
 	int aPitch = mWidth*4;
 	int aFormat = 0x8888;
 	if (mForcedMode && !mHasAlpha && !mHasTrans)
@@ -1874,7 +1874,7 @@ void MemoryImage::BltTrianglesTex(Image *theTexture, const TriVertex theVertices
 {
 	theTexture->mDrawn = true;
 
-	DWORD *aSurface = GetBits();
+	ulong *aSurface = GetBits();
 
 	int aPitch = mWidth*4;
 	int aFormat = 0x8888;

@@ -23,7 +23,7 @@
 
 	ulong* aNewHorzPixelsEnd = aNewHorzPixels + (aTempDestWidth*aSrcHeightI*4);
 	(void)aNewHorzPixelsEnd; // unused in Release mode
-	ZeroMemory(aNewHorzPixels, aTempDestWidth*aSrcHeightI*4*4);
+	memset(aNewHorzPixels, 0, aTempDestWidth*aSrcHeightI*4*4);
 
 	int aSrcImageWidth = theImage->GetWidth();
 	(void)aSrcImageWidth; // unused, but not sure if no side-effects
@@ -137,7 +137,7 @@
 	ulong* aNewPixelsEnd = aNewPixels + (aTempDestWidth*aTempDestHeight*4);
 	(void)aNewPixelsEnd; // Unused in Release mode
 
-	ZeroMemory(aNewPixels, aTempDestWidth*aTempDestHeight*4*4);
+	memset(aNewPixels, 0, aTempDestWidth*aTempDestHeight*4*4);
 
 	// Now resize vertically
 	if (theSrcRect.mHeight >= theDestRect.mHeight)
