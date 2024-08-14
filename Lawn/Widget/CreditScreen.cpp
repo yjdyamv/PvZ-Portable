@@ -1676,7 +1676,7 @@ void CreditScreen::PauseCredits()
 
     mCreditsPaused = false;
     mApp->mMusic->GameMusicPause(false);
-    ((TodsHackyUnprotectedPerfTimer*)&mTimerSinceStart)->SetStartTime(aDurationOnPause);
+    //((TodsHackyUnprotectedPerfTimer*)&mTimerSinceStart)->SetStartTime(aDurationOnPause);
 }
 
 //0x438530

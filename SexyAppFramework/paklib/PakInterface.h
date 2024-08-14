@@ -4,6 +4,7 @@
 #include <map>
 #include <list>
 #include <string>
+#include <cstdint>
 
 class PakCollection;
 

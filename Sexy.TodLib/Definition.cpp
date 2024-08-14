@@ -652,11 +652,11 @@ bool DefinitionIsCompiled(const SexyString& theXMLFilePath)
 
     struct stat attr;
 
-    if (stat(aCompiledFilePath.c_str(), &attr) != 0);
+    if (stat(aCompiledFilePath.c_str(), &attr) != 0)
         return false;
     time_t aCompiledFileTime = attr.st_mtime;
 
-    if (stat(theXMLFilePath.c_str(), &attr) != 0);
+    if (stat(theXMLFilePath.c_str(), &attr) != 0)
     {
         TodTrace(_S("Can't file source file to compile '%s'"), theXMLFilePath.c_str());
         return false;

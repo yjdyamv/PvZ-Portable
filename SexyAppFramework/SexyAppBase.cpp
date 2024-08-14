@@ -222,8 +222,8 @@ SexyAppBase::SexyAppBase()
 	mCursorThreadRunning = false;
 	mNumLoadingThreadTasks = 0;
 	mCompletedLoadingThreadTasks = 0;	
-	mLastDrawTick = time(0);
-	mNextDrawTick = time(0);
+	mLastDrawTick = SDL_GetTicks();
+	mNextDrawTick = SDL_GetTicks();
 	mSysCursor = true;	
 	mForceFullscreen = false;
 	mForceWindowed = false;
@@ -538,7 +538,7 @@ static BOOL CALLBACK ChangeDisplayWindowEnumProc(HWND hwnd, LPARAM lParam)
 
 void SexyAppBase::ClearUpdateBacklog(bool relaxForASecond)
 {
-	mLastTimeCheck = time(0);
+	mLastTimeCheck = SDL_GetTicks();
 	mUpdateFTimeAcc = 0.0;
 
 	if (relaxForASecond)
@@ -2446,7 +2446,7 @@ void SexyAppBase::Redraw(Rect* theClipRect)
 			mWidgetManager->mImage = mGLInterface->GetScreenImage();
 			mWidgetManager->MarkAllDirty();
 
-			mLastTime = time(0);
+			mLastTime = SDL_GetTicks();
 		}
 	}
 	else
@@ -2678,7 +2678,7 @@ bool SexyAppBase::DrawDirtyStuff()
 			CalculateDemoTimeLeft();
 	}
 
-	DWORD aStartTime = time(0);
+	DWORD aStartTime = SDL_GetTicks();
 
 	// Update user input and screen saver info
 	static DWORD aPeriodicTick = 0;
@@ -2706,7 +2706,7 @@ bool SexyAppBase::DrawDirtyStuff()
 
 		mDrawCount++;		
 
-		DWORD aMidTime = time(0);
+		DWORD aMidTime = SDL_GetTicks();
 
 		mFPSCount++;
 		mFPSTime += aMidTime - aStartTime;
@@ -2725,13 +2725,13 @@ bool SexyAppBase::DrawDirtyStuff()
 		/*
 		if (mWaitForVSync && mIsPhysWindowed && mSoftVSyncWait)
 		{
-			DWORD aTick = time(0);
+			DWORD aTick = SDL_GetTicks();
 			if (aTick-mLastDrawTick < mGLInterface->mMillisecondsPerFrame)
 				Sleep(mDDInterface->mMillisecondsPerFrame - (aTick-mLastDrawTick));
 		}
 		*/
 
-		DWORD aPreScreenBltTime = time(0);
+		DWORD aPreScreenBltTime = SDL_GetTicks();
 		mLastDrawTick = aPreScreenBltTime;
 
 		Redraw(NULL);		
@@ -2739,7 +2739,7 @@ bool SexyAppBase::DrawDirtyStuff()
 		// This is our one UpdateFTimeAcc if we are vsynched
 		UpdateFTimeAcc(); 
 
-		DWORD aEndTime = time(0);
+		DWORD aEndTime = SDL_GetTicks();
 
 		mScreenBltTime = aEndTime - aPreScreenBltTime;
 
@@ -3082,7 +3082,7 @@ static int ListDemoMarkers()
     GlobalFree(hgbl); 
 	*/
 
-	gSexyAppBase->mLastTime = time(0);
+	gSexyAppBase->mLastTime = SDL_GetTicks();
 
     return 0; 
 }
@@ -3254,7 +3254,7 @@ static int DemoJumpToTime()
     GlobalFree(hgbl); 
 	*/
 
-	gSexyAppBase->mLastTime = time(0);
+	gSexyAppBase->mLastTime = SDL_GetTicks();
 
     return 0; 
 }
@@ -3593,7 +3593,7 @@ void SexyAppBase::ShowMemoryUsage()
 	aStr += StrFormat("Palette8: %d - %s KB\r\n",aUsage.first,SexyStringToString(CommaSeperate(aUsage.second/1024)).c_str());
 	
 	MsgBox(aStr,"Video Stats",MB_OK);
-	mLastTime = time(0);
+	mLastTime = SDL_GetTicks();
 }
 
 bool SexyAppBase::DebugKeyDown(int theKey)
@@ -3642,7 +3642,7 @@ bool SexyAppBase::DebugKeyDown(int theKey)
 			char aBuf[512];
 			sprintf(aBuf,"3D-Mode: %s",Is3DAccelerated()?"ON":"OFF");
 			MsgBox(aBuf,"Mode Switch",MB_OK);
-			mLastTime = time(0);
+			mLastTime = SDL_GetTicks();
 		}
 		else
 			ShowMemoryUsage();
@@ -4606,7 +4606,7 @@ void SexyAppBase::LoadingThreadProcStub(void *theArg)
 	aSexyApp->LoadingThreadProc();		
 
 	char aStr[256];
-	sprintf(aStr, "Resource Loading Time: %ld\r\n", (GetTickCount() - aSexyApp->mTimeLoaded));
+	sprintf(aStr, "Resource Loading Time: %ld\r\n", (SDL_GetTicks() - aSexyApp->mTimeLoaded));
 	OutputDebugStringA(aStr);
 
 	aSexyApp->mLoadingThreadCompleted = true;
@@ -4658,7 +4658,7 @@ void SexyAppBase::CursorThreadProc()
 		if ((aCursorPos.x != aLastCursorPos.x) ||
 			(aCursorPos.y != aLastCursorPos.y))
 		{	
-			DWORD aTimeNow = time(0);
+			DWORD aTimeNow = SDL_GetTicks();
 			if (aTimeNow - mNextDrawTick > mGLInterface->mMillisecondsPerFrame + 5)
 			{
 				// Do the special drawing if we are rendering at less than full framerate				
@@ -4743,7 +4743,7 @@ void SexyAppBase::SwitchScreenMode(bool wantWindowed, bool is3d, bool force)
 		//mSoundManager->SetCooperativeWindow(mHWnd);
 	}	
 
-	mLastTime = time(0);
+	mLastTime = SDL_GetTicks();
 }
 
 void SexyAppBase::SwitchScreenMode(bool wantWindowed)
@@ -4888,7 +4888,7 @@ void SexyAppBase::ProcessSafeDeleteList()
 
 void SexyAppBase::UpdateFTimeAcc()
 {
-	DWORD aCurTime = time(0);
+	DWORD aCurTime = SDL_GetTicks();
 
 	if (mLastTimeCheck != 0)
 	{				
@@ -5012,7 +5012,7 @@ bool SexyAppBase::Process(bool allowSleep)
 	// Make sure we're not paused
 	if ((!mPaused) && (mUpdateMultiplier > 0))
 	{
-		ulong aStartTime = time(0);
+		ulong aStartTime = SDL_GetTicks();
 		
 		// ulong aCurTime = aStartTime; // Unused
 		int aCumSleepTime = 0;
@@ -5157,7 +5157,7 @@ bool SexyAppBase::Process(bool allowSleep)
 			// This is to make sure that the title screen doesn't take up any more than 
 			// 1/3 of the processor time
 
-			ulong anEndTime = time(0);
+			ulong anEndTime = SDL_GetTicks();
 			int anElapsedTime = (anEndTime - aStartTime) - aCumSleepTime;
 			int aLoadingYieldSleepTime = std::min(250, (anElapsedTime * 2) - aCumSleepTime);
 
@@ -5333,7 +5333,7 @@ void SexyAppBase::Start()
 	//int aCount = 0; // unused
 	//int aSleepCount = 0; // unused
 
-	DWORD aStartTime = time(0);		
+	DWORD aStartTime = SDL_GetTicks();
 
 	mRunning = true;
 	mLastTime = aStartTime;
@@ -5348,7 +5348,7 @@ void SexyAppBase::Start()
 	WaitForLoadingThread();
 
 	char aString[256];
-	sprintf(aString, "Seconds       = %g\r\n", (time(0) - aStartTime) / 1000.0);
+	sprintf(aString, "Seconds       = %g\r\n", (SDL_GetTicks() - aStartTime) / 1000.0);
 	OutputDebugStringA(aString);
 	//sprintf(aString, "Count         = %d\r\n", aCount);
 	//OutputDebugString(aString);
@@ -5855,7 +5855,7 @@ void SexyAppBase::Init()
 		}
 	}
 
-	srand(GetTickCount());
+	srand(SDL_GetTicks());
 
 	mIsWideWindow = sizeof(SexyChar) == sizeof(wchar_t);
 

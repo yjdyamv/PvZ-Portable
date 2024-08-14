@@ -1,7 +1,7 @@
-#include "PakInterface.h"
 #define NOMINMAX 1
 #include <windows.h>
 #include <direct.h>
+#include "PakInterface.h"
 
 typedef unsigned char uchar;
 typedef unsigned short ushort;
@@ -26,8 +26,8 @@ static std::string StringToUpper(const std::string& theString)
 
 PakInterface::PakInterface()
 {
-	if (GetPakPtr() == NULL)
-		*gPakInterfaceP = this;
+	//if (GetPakPtr() == NULL)
+		//*gPakInterfaceP = this;
 }
 
 PakInterface::~PakInterface()
@@ -108,8 +108,8 @@ bool PakInterface::AddPakFile(const std::string& theFileName)
 		aName[aNameWidth] = 0;
 		int aSrcSize = 0;
 		FRead(&aSrcSize, sizeof(int), 1, aFP);
-		FILETIME aFileTime;
-		FRead(&aFileTime, sizeof(FILETIME), 1, aFP);
+		int64_t aFileTime;
+		FRead(&aFileTime, sizeof(int64_t), 1, aFP);
 
 		PakRecordMap::iterator aRecordItr = mPakRecordMap.insert(PakRecordMap::value_type(StringToUpper(aName), PakRecord())).first;
 		PakRecord* aPakRecord = &(aRecordItr->second);
@@ -340,6 +340,7 @@ int PakInterface::FEof(PFILE* theFile)
 		return feof(theFile->mFP);
 }
 
+/*
 bool PakInterface::PFindNext(PFindData* theFindData, LPWIN32_FIND_DATA lpFindFileData)
 {
 	PakRecordMap::iterator anItr;
@@ -444,4 +445,4 @@ BOOL PakInterface::FindClose(HANDLE hFindFile)
 	delete aFindData;
 	return TRUE;
 }
-
+*/
