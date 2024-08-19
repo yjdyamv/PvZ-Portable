@@ -1419,7 +1419,7 @@ void ZenGarden::StinkyWakeUp(GridItem* theStinky)
     Reanimation* aSleepingReanim = FindReanimAttachment(aStinkyReanim->GetTrackInstanceByName("shell")->mAttachmentID);
     aSleepingReanim->ReanimationDie();
 
-    gLawnApp->mPlayerInfo->mHasWokenStinky = TRUE;
+    gLawnApp->mPlayerInfo->mHasWokenStinky = 1;
 }
 
 //0x5201D0
@@ -2346,7 +2346,7 @@ void ZenGarden::WakeStinky()
     mApp->mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_STINKY_THE_SNAIL] = time(0);
     mApp->PlaySample(SOUND_TAP);
     mBoard->ClearAdvice(AdviceType::ADVICE_STINKY_SLEEPING);
-    gLawnApp->mPlayerInfo->mHasWokenStinky = TRUE;
+    gLawnApp->mPlayerInfo->mHasWokenStinky = 1;
 }
 
 //0x522090

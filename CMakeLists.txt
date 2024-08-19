@@ -51,7 +51,7 @@ target_include_directories(re-plants-vs-zombies PRIVATE
 )
 target_compile_definitions(re-plants-vs-zombies PRIVATE _DEBUG)
 
-target_link_libraries(re-plants-vs-zombies jpeg png z SDL2_mixer_ext ${SDL2_LIBRARIES} ${GLEW_LIBRARIES})
+target_link_libraries(re-plants-vs-zombies jpeg png z SDL2_mixer_ext_Static ${SDL2_LIBRARIES} ${GLEW_LIBRARIES})
 
 if (WIN32)
 	target_link_options(re-plants-vs-zombies PRIVATE -static -static-libgcc -static-libstdc++)

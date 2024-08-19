@@ -7245,6 +7245,7 @@ void Board::DrawDebugText(Graphics* g)
 			}
 			aText += StrFormat(_S("\n"));
 
+			/*
 			int aPackedOrderMain = mApp->mMusic->GetMusicOrder(mApp->mMusic->mCurMusicFileMain);
 			int aCurrentOrder = LOWORD(aPackedOrderMain);
 			aText += StrFormat(_S("Music order %02d row %02d\n"), LOWORD(aPackedOrderMain), HIWORD(aPackedOrderMain) / 4);
@@ -7265,7 +7266,6 @@ void Board::DrawDebugText(Graphics* g)
 					}
 				}
 
-				/*
 				HMUSIC aMusicHandle1 = mApp->mMusic->GetBassMusicHandle(mApp->mMusic->mCurMusicFileMain);
 				HMUSIC aMusicHandle2 = mApp->mMusic->GetBassMusicHandle(mApp->mMusic->mCurMusicFileHihats);
 				HMUSIC aMusicHandle3 = mApp->mMusic->GetBassMusicHandle(mApp->mMusic->mCurMusicFileDrums);
@@ -7276,7 +7276,6 @@ void Board::DrawDebugText(Graphics* g)
 				gBass->BASS_ChannelGetAttribute(aMusicHandle2, BASS_ATTRIB_MUSIC_BPM, &bpm2);
 				gBass->BASS_ChannelGetAttribute(aMusicHandle3, BASS_ATTRIB_MUSIC_BPM, &bpm3);
 				aText += StrFormat(_S("bpm1 %f bmp2 %f bpm3 %f\n"), bpm1, bpm2, bpm3);
-				*/
 			}
 			else if (mApp->mMusic->mCurMusicTune == MusicTune::MUSIC_TUNE_NIGHT_MOONGRAINS)
 			{
@@ -7288,6 +7287,7 @@ void Board::DrawDebugText(Graphics* g)
 					aText += StrFormat(_S("Drums unsynced %d"), aDiffDrums);
 				}
 			}
+			*/
 		}
 
 		break;
