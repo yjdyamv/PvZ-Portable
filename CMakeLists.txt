@@ -40,7 +40,7 @@ if(NINTENDO_SWITCH)
 else()
 	list(APPEND SOURCES
 		${CMAKE_CURRENT_SOURCE_DIR}/SexyAppFramework/graphics/platform/pc/Window.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/SexyAppFramework/graphics/platform/pc/GLInterface.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/SexyAppFramework/graphics/platform/pc/GLInterfaceModern.cpp
 	)
 endif()
 

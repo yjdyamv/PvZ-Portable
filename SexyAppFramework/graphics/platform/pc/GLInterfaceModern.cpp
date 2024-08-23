@@ -1,7 +1,8 @@
-#include <switch.h>
-#include <EGL/egl.h>    // EGL library
-#include <EGL/eglext.h> // EGL extensions
-#include <glad/glad.h>  // glad library (OpenGL loader)
+#include <SDL.h>
+
+#include <GL/glew.h>
+#include <GL/glext.h>
+
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
@@ -192,8 +193,8 @@ static const char *UNTEXTURED_SHADER =
 static GLuint shaderCompile(const char *shaderStr, uint32_t shaderStrLen, GLenum shaderType)
 {
 	const GLchar *shaderDefine = (shaderType == GL_VERTEX_SHADER)
-		? "\n#version 300 es\n#define VERTEX  \n#define v2f out\n"
-		: "\n#version 300 es\n#define FRAGMENT\n#define v2f in\n";
+		? "\n#version 150\n#define VERTEX  \n#define v2f out\n"
+		: "\n#version 150\n#define FRAGMENT\n#define v2f in\n";
 
 	const GLchar *shaderStrings[2] = {shaderDefine, shaderStr};
 	GLint shaderStringLengths[2] = {(GLint)strlen(shaderDefine), (GLint)shaderStrLen};
@@ -1285,13 +1286,10 @@ GLInterface::GLInterface(SexyAppBase* theApp)
 
 	mPresentationRect = Rect( 0, 0, mWidth, mHeight );
 
-	/*
 	SDL_DisplayMode aMode;
-	SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(mApp->mSDLWindow), &aMode);
+	SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex((SDL_Window*)mApp->mWindow), &aMode);
 	mRefreshRate = aMode.refresh_rate;
 	if (!mRefreshRate) mRefreshRate = 60;
-	*/
-	mRefreshRate = 60;
 	mMillisecondsPerFrame = 1000/mRefreshRate;
 
 	mScreenImage = 0;
@@ -1369,7 +1367,6 @@ GLImage* GLInterface::GetScreenImage()
 
 void GLInterface::UpdateViewport()
 {
-	/*
 	// Restrict to 4:3
 	// https://bumbershootsoft.wordpress.com/2018/11/29/forcing-an-aspect-ratio-in-3d-with-opengl/
 
@@ -1378,7 +1375,7 @@ void GLInterface::UpdateViewport()
 	int viewport_x = 0;
 	int viewport_y = 0;
 
-	SDL_GL_GetDrawableSize(mApp->mSDLWindow, &width, &height);
+	SDL_GL_GetDrawableSize((SDL_Window*)mApp->mWindow, &width, &height);
 
 	glClear(GL_COLOR_BUFFER_BIT);
 	Flush();
@@ -1400,7 +1397,6 @@ void GLInterface::UpdateViewport()
 
 	glClear(GL_COLOR_BUFFER_BIT);
 	Flush();
-	*/
 }
 
 int GLInterface::Init(bool IsWindowed)
@@ -1410,8 +1406,8 @@ int GLInterface::Init(bool IsWindowed)
 	{
 		inited = true;
 
-		// Load OpenGL routines using glad
-		gladLoadGL();
+		glewExperimental = GL_TRUE;
+		const GLenum glewInitResult = glewInit();
 
 		gProgram = shaderLoad(TEXTURED_SHADER);
 
@@ -1517,7 +1513,7 @@ bool GLInterface::PreDraw()
 
 void GLInterface::Flush()
 {
-	eglSwapBuffers(mApp->mWindow, mApp->mSurface);
+	SDL_GL_SwapWindow((SDL_Window*)mApp->mWindow);
 }
 
 bool GLInterface::CreateImageTexture(MemoryImage *theImage)
