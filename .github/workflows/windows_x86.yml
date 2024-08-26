@@ -10,11 +10,24 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW32
+          update: true
+          install: >-
+            mingw-w64-i686-cmake
+            mingw-w64-i686-make
+            mingw-w64-i686-zlib
+            mingw-w64-i686-gcc
+            mingw-w64-i686-SDL2
+            mingw-w64-i686-glew
+            mingw-w64-i686-libopenmpt
+            mingw-w64-i686-mpg123
+            mingw-w64-i686-libvorbis
+            mingw-w64-i686-libogg
+            mingw-w64-i686-libjpeg-turbo
+            mingw-w64-i686-libpng
 
       - name: Install dependencies and compile
         shell: msys2 {0}
         run: |
-          pacman -S --noconfirm cmake make zlib zlib-devel mingw-w64-i686-gcc mingw-w64-i686-SDL2 mingw-w64-i686-glew mingw-w64-i686-libopenmpt mingw-w64-i686-mpg123 mingw-w64-i686-libvorbis mingw-w64-i686-libogg mingw-w64-i686-libjpeg-turbo mingw-w64-i686-libpng
           mkdir build
           cd build
           cmake .. -G "Unix Makefiles"
