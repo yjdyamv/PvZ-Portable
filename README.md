@@ -5,8 +5,8 @@ Fork of Patoke's PVZ GOTY decompilation with the following objectives:
 - [x] Replace Windows code with cross-platform code
 - [x] Make a native port to Linux
 - [x] Replace DirectSound/BASS/FMod with [SDL Mixer X](https://github.com/WohlSoft/SDL-Mixer-X)
-- [x] main.pak support
   * This project uses a fork of SDL Mixer X that adds compatibility with the MO3 format by using libopenmpt. This fork is located under SexyAppFramework/sound/SDL-Mixer-X
+- [x] main.pak support
 * Port the game to some videogame consoles:
 
 | Console         | Notes                                                                                      |
