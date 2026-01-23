@@ -444,6 +444,105 @@ void FixBoardAfterLoad(Board* theBoard)
 		{
 			aZombie->mApp = theBoard->mApp;
 			aZombie->mBoard = theBoard;
+
+			switch (aZombie->mZombieType)
+			{
+			case ZombieType::ZOMBIE_GARGANTUAR:
+			case ZombieType::ZOMBIE_REDEYE_GARGANTUAR:
+			{
+				Reanimation* aBodyReanim = theBoard->mApp->ReanimationGet(aZombie->mBodyReanimID);
+				if (aBodyReanim)
+				{
+					int aDamageIndex = aZombie->GetBodyDamageIndex();
+					if (aDamageIndex >= 1)
+					{
+						aBodyReanim->SetImageOverride("Zombie_gargantua_body1", IMAGE_REANIM_ZOMBIE_GARGANTUAR_BODY1_2);
+						aBodyReanim->SetImageOverride("Zombie_gargantuar_outerarm_lower", IMAGE_REANIM_ZOMBIE_GARGANTUAR_OUTERARM_LOWER2);
+					}
+					if (aDamageIndex >= 2)
+					{
+						aBodyReanim->SetImageOverride("Zombie_gargantua_body1", IMAGE_REANIM_ZOMBIE_GARGANTUAR_BODY1_3);
+						aBodyReanim->SetImageOverride("Zombie_gargantuar_outerleg_foot", IMAGE_REANIM_ZOMBIE_GARGANTUAR_FOOT2);
+					}
+
+					if (aZombie->mZombieType == ZombieType::ZOMBIE_REDEYE_GARGANTUAR)
+					{
+						if (aDamageIndex >= 2)
+							aBodyReanim->SetImageOverride("anim_head1", IMAGE_REANIM_ZOMBIE_GARGANTUAR_HEAD2_REDEYE);
+						else
+							aBodyReanim->SetImageOverride("anim_head1", IMAGE_REANIM_ZOMBIE_GARGANTUAR_HEAD_REDEYE);
+					}
+					else if (aDamageIndex >= 2)
+					{
+						aBodyReanim->SetImageOverride("anim_head1", IMAGE_REANIM_ZOMBIE_GARGANTUAR_HEAD2);
+					}
+				}
+				break;
+			}
+
+			case ZombieType::ZOMBIE_ZAMBONI:
+			{
+				Reanimation* aBodyReanim = theBoard->mApp->ReanimationGet(aZombie->mBodyReanimID);
+				if (aBodyReanim)
+				{
+					int aDamageIndex = aZombie->GetBodyDamageIndex();
+					if (aDamageIndex >= 1)
+					{
+						aBodyReanim->SetImageOverride("Zombie_zamboni_1", IMAGE_REANIM_ZOMBIE_ZAMBONI_1_DAMAGE1);
+						aBodyReanim->SetImageOverride("Zombie_zamboni_2", IMAGE_REANIM_ZOMBIE_ZAMBONI_2_DAMAGE1);
+					}
+					if (aDamageIndex >= 2)
+					{
+						aBodyReanim->SetImageOverride("Zombie_zamboni_1", IMAGE_REANIM_ZOMBIE_ZAMBONI_1_DAMAGE2);
+						aBodyReanim->SetImageOverride("Zombie_zamboni_2", IMAGE_REANIM_ZOMBIE_ZAMBONI_2_DAMAGE2);
+					}
+				}
+				break;
+			}
+
+			case ZombieType::ZOMBIE_CATAPULT:
+			{
+				Reanimation* aBodyReanim = theBoard->mApp->ReanimationGet(aZombie->mBodyReanimID);
+				if (aBodyReanim)
+				{
+					int aDamageIndex = aZombie->GetBodyDamageIndex();
+					if (aDamageIndex >= 1)
+					{
+						aBodyReanim->SetImageOverride("Zombie_catapult_siding", IMAGE_REANIM_ZOMBIE_CATAPULT_SIDING_DAMAGE);
+					}
+				}
+				break;
+			}
+
+			case ZombieType::ZOMBIE_BOSS:
+			{
+				Reanimation* aBodyReanim = theBoard->mApp->ReanimationGet(aZombie->mBodyReanimID);
+				if (aBodyReanim)
+				{
+					int aDamageIndex = aZombie->GetBodyDamageIndex();
+					if (aDamageIndex >= 1)
+					{
+						aBodyReanim->SetImageOverride("Boss_head", IMAGE_REANIM_ZOMBIE_BOSS_HEAD_DAMAGE1);
+						aBodyReanim->SetImageOverride("Boss_jaw", IMAGE_REANIM_ZOMBIE_BOSS_JAW_DAMAGE1);
+						aBodyReanim->SetImageOverride("Boss_outerarm_hand", IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_HAND_DAMAGE1);
+						aBodyReanim->SetImageOverride("Boss_outerarm_thumb2", IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_THUMB_DAMAGE1);
+						aBodyReanim->SetImageOverride("Boss_innerleg_foot", IMAGE_REANIM_ZOMBIE_BOSS_FOOT_DAMAGE1);
+					}
+					if (aDamageIndex >= 2)
+					{
+						aBodyReanim->SetImageOverride("Boss_head", IMAGE_REANIM_ZOMBIE_BOSS_HEAD_DAMAGE2);
+						aBodyReanim->SetImageOverride("Boss_jaw", IMAGE_REANIM_ZOMBIE_BOSS_JAW_DAMAGE2);
+						aBodyReanim->SetImageOverride("Boss_outerarm_hand", IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_HAND_DAMAGE2);
+						aBodyReanim->SetImageOverride("Boss_outerarm_thumb2", IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_THUMB_DAMAGE2);
+						aBodyReanim->SetImageOverride("Boss_outerleg_foot", IMAGE_REANIM_ZOMBIE_BOSS_FOOT_DAMAGE2);
+					}
+				}
+				break;
+			}
+
+			default:
+				break;
+			}
 		}
 	}
 	{
