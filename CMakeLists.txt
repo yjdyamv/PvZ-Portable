@@ -96,7 +96,7 @@ target_include_directories(re-plants-vs-zombies PRIVATE
 	${SDL2_INCLUDE_DIRS}
 	${PLAT_INCLUDES}
 )
-#target_compile_definitions(re-plants-vs-zombies PRIVATE _DEBUG)
+target_compile_definitions(re-plants-vs-zombies PRIVATE _DEBUG)
 target_compile_definitions(re-plants-vs-zombies PRIVATE DO_FIX_BUGS)
 
 if (LOW_MEMORY)
