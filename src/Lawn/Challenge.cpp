@@ -565,8 +565,8 @@ int Challenge::BeghouledTwistMoveCausesMatch(int theGridX, int theGridY, Beghoul
 
 	theBoardState->mSeedType[theGridX + 1][theGridY] = aSeed1;
 	theBoardState->mSeedType[theGridX + 1][theGridY + 1] = aSeed2;
-	theBoardState->mSeedType[theGridX][theGridY + 1] = aSeed3;
-	theBoardState->mSeedType[theGridX][theGridY] = aSeed4;
+	theBoardState->mSeedType[theGridX][theGridY + 1] = aSeed4;
+	theBoardState->mSeedType[theGridX][theGridY] = aSeed3;
 
 	int aHasMatch = BeghouledBoardHasMatch(theBoardState);
 
