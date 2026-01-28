@@ -884,6 +884,7 @@ static void SyncDataArrayPortableTLV(PortableSaveContext& theContext, DataArray<
 		{
 			uint32_t aItemSize = 0;
 			theContext.SyncUInt32(aItemSize);
+			memset(&theDataArray.mBlock[i].mItem, 0, sizeof(T));
 			std::vector<unsigned char> aItemData;
 			aItemData.resize(aItemSize);
 			if (aItemSize > 0)
@@ -1181,6 +1182,9 @@ static void SyncPlantsPortable(PortableSaveContext& theContext, Board* theBoard)
 		{
 			WriteGameObjectField(aOut, 1U, thePlant);
 			WritePodTailField(aOut, 2U, thePlant, &Plant::mSeedType);
+			AppendFieldWithSync(aOut, 3U, [&](PortableSaveContext& c){ c.SyncEnum(thePlant.mSeedType); });
+			AppendFieldWithSync(aOut, 4U, [&](PortableSaveContext& c){ c.SyncEnum(thePlant.mImitaterType); });
+			AppendFieldWithSync(aOut, 5U, [&](PortableSaveContext& c){ c.SyncInt32(thePlant.mPottedPlantIndex); });
 		},
 		[&](uint32_t aFieldId, const unsigned char* aData, size_t aSize, Plant& thePlant)
 		{
@@ -1188,6 +1192,9 @@ static void SyncPlantsPortable(PortableSaveContext& theContext, Board* theBoard)
 			{
 			case 1U: ReadGameObjectField(aData, aSize, thePlant); break;
 			case 2U: ReadPodTailField(aData, aSize, thePlant, &Plant::mSeedType); break;
+			case 3U: ApplyFieldWithSync(aData, aSize, [&](PortableSaveContext& c){ c.SyncEnum(thePlant.mSeedType); }); break;
+			case 4U: ApplyFieldWithSync(aData, aSize, [&](PortableSaveContext& c){ c.SyncEnum(thePlant.mImitaterType); }); break;
+			case 5U: ApplyFieldWithSync(aData, aSize, [&](PortableSaveContext& c){ c.SyncInt32(thePlant.mPottedPlantIndex); }); break;
 			default: break;
 			}
 		});
