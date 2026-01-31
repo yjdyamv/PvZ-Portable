@@ -4863,6 +4863,14 @@ void SexyAppBase::Init()
 	}
 	*/
 
+	// Set resource directory (for main.pak, properties/, etc.)
+	if (!ChangeDirHook(mResourceDir.c_str()))
+	{
+		SetResourceFolder(mResourceDir);
+	}
+
+	gPakInterface->AddPakFile(GetResourcePath("main.pak"));
+
 	InitPropertiesHook();
 
 #if !defined(__SWITCH__) && !defined(__3DS__)
@@ -4913,12 +4921,6 @@ void SexyAppBase::Init()
 	//if(gHInstance==nullptr)
 		//gHInstance = (HINSTANCE)GetModuleHandle(nullptr);
 
-	// Set resource directory (for main.pak, properties/, etc.)
-	if (!ChangeDirHook(mResourceDir.c_str()))
-	{
-		SetResourceFolder(mResourceDir);
-	}
-
 	// Handle custom save directory from -savedir parameter
 	if (!mCustomSaveDir.empty())
 	{
@@ -4930,8 +4932,6 @@ void SexyAppBase::Init()
 	}
 
 	ReadFromRegistry();	
-
-	gPakInterface->AddPakFile(GetResourcePath("main.pak"));
 
 	// Create a message we can use to talk to ourselves inter-process
 	//mNotifyGameMessage = RegisterWindowMessage((__S("Notify") + StringToSexyString(mProdName)).c_str());
