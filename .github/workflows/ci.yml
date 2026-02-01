@@ -141,7 +141,6 @@ jobs:
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgJsonGlob: vcpkg.json
-        vcpkgTriplet: x64-windows-static
 
     - name: Compile PvZ-Portable for Windows (MSVC)
       shell: pwsh
