@@ -128,7 +128,7 @@ void ToolTipWidget::Draw(Graphics* g)
 	}
 	if (mMinLeft - g->mTransX > aPosX)  // aPosX + g->mTransX < mMinLeft
 	{
-		aPosX = mMinLeft - (int)g->mTransX;
+		aPosX = mMinLeft - static_cast<int>(g->mTransX);
 	}
 	else if (aPosX + mWidth + g->mTransX > BOARD_WIDTH)
 	{
@@ -138,11 +138,11 @@ void ToolTipWidget::Draw(Graphics* g)
 	int aPosY = mY;
 	if (-g->mTransY > aPosY)  // aPosY + g->mTransY > 0
 	{
-		aPosY = (int)-g->mTransY;
+		aPosY = static_cast<int>(-g->mTransY);
 	}
 	else if (mMaxBottom < mY + mHeight + g->mTransY)
 	{
-		aPosY = mMaxBottom - (int)g->mTransY - mHeight;
+		aPosY = mMaxBottom - static_cast<int>(g->mTransY) - mHeight;
 	}
 
 	g->SetColor(Color(255, 255, 200, 255));

@@ -97,7 +97,7 @@ void                                ReanimatorEnsureDefinitionLoaded(Reanimation
 void                                ReanimatorLoadDefinitions(ReanimationParams* theReanimationParamArray, int theReanimationParamArraySize);
 void                                ReanimatorFreeDefinitions();
 
-extern ReanimationParams gLawnReanimationArray[(int)ReanimationType::NUM_REANIMS];  //0x6A1340
+extern ReanimationParams gLawnReanimationArray[static_cast<int>(ReanimationType::NUM_REANIMS)];  //0x6A1340
 
 // ######################################################################################################################################################
 // ############################################################## 以下正式开始动画相关声明 ##############################################################

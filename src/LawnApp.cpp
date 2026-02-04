@@ -608,7 +608,7 @@ void LawnApp::KillChallengeScreen()
 StoreScreen* LawnApp::ShowStoreScreen()
 {
 	//FinishModelessDialogs();
-	TOD_ASSERT(!GetDialog((int)Dialogs::DIALOG_STORE));
+	TOD_ASSERT(!GetDialog(static_cast<int>(Dialogs::DIALOG_STORE)));
 
 	StoreScreen* aStoreScreen = new StoreScreen(this);
 	AddDialog(aStoreScreen);
@@ -1773,7 +1773,7 @@ void LawnApp::LoadingThreadProc()
 		return;
 
 	aHesitationResources.EndBracket();
-	TodTrace("loading '%s' %d ms", "resources", (int)aTimer.GetDuration());
+	TodTrace("loading '%s' %d ms", "resources", static_cast<int>(aTimer.GetDuration()));
 
 	mMusic->MusicInit();
 	// aDuration goes unused
@@ -1787,11 +1787,11 @@ void LawnApp::LoadingThreadProc()
 	mReanimatorCache->ReanimatorCacheInitialize();
 	TodFoleyInitialize(gLawnFoleyParamArray, LENGTH(gLawnFoleyParamArray));
 
-	TodTrace("loading '%s' %d ms", "stuff", (int)aTimer.GetDuration());
+	TodTrace("loading '%s' %d ms", "stuff", static_cast<int>(aTimer.GetDuration()));
 	aTimer.Start();
 
 	TrailLoadDefinitions(gLawnTrailArray, LENGTH(gLawnTrailArray));
-	TodTrace("loading '%s' %d ms", "trail", (int)aTimer.GetDuration());
+	TodTrace("loading '%s' %d ms", "trail", static_cast<int>(aTimer.GetDuration()));
 	aTimer.Start();
 	TodHesitationTrace("trail");
 	
@@ -2322,7 +2322,7 @@ bool LawnApp::IsNight()
 
 int LawnApp::GetCurrentChallengeIndex()
 {
-	return (int)mGameMode - (int)GameMode::GAMEMODE_SURVIVAL_NORMAL_STAGE_1;
+	return static_cast<int>(mGameMode) - static_cast<int>(GameMode::GAMEMODE_SURVIVAL_NORMAL_STAGE_1);
 }
 
 ChallengeDefinition& LawnApp::GetCurrentChallengeDef()
@@ -2417,35 +2417,35 @@ bool LawnApp::HasSeedType(SeedType theSeedType)
 
 	if (theSeedType == SeedType::SEED_TWINSUNFLOWER)
 	{
-		return mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_PLANT_TWINSUNFLOWER] > 0;
+		return mPlayerInfo->mPurchases[static_cast<int>(StoreItem::STORE_ITEM_PLANT_TWINSUNFLOWER)] > 0;
 	}
 	if (theSeedType == SeedType::SEED_GLOOMSHROOM)
 	{
-		return mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_PLANT_GLOOMSHROOM] > 0;
+		return mPlayerInfo->mPurchases[static_cast<int>(StoreItem::STORE_ITEM_PLANT_GLOOMSHROOM)] > 0;
 	}
 	if (theSeedType == SeedType::SEED_CATTAIL)
 	{
-		return mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_PLANT_CATTAIL] > 0;
+		return mPlayerInfo->mPurchases[static_cast<int>(StoreItem::STORE_ITEM_PLANT_CATTAIL)] > 0;
 	}
 	if (theSeedType == SeedType::SEED_WINTERMELON)
 	{
-		return mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_PLANT_WINTERMELON] > 0;
+		return mPlayerInfo->mPurchases[static_cast<int>(StoreItem::STORE_ITEM_PLANT_WINTERMELON)] > 0;
 	}
 	if (theSeedType == SeedType::SEED_GOLD_MAGNET)
 	{
-		return mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_PLANT_GOLD_MAGNET] > 0;
+		return mPlayerInfo->mPurchases[static_cast<int>(StoreItem::STORE_ITEM_PLANT_GOLD_MAGNET)] > 0;
 	}
 	if (theSeedType == SeedType::SEED_SPIKEROCK)
 	{
-		return mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_PLANT_SPIKEROCK] > 0;
+		return mPlayerInfo->mPurchases[static_cast<int>(StoreItem::STORE_ITEM_PLANT_SPIKEROCK)] > 0;
 	}
 	if (theSeedType == SeedType::SEED_COBCANNON)
 	{
-		return mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_PLANT_COBCANNON] > 0;
+		return mPlayerInfo->mPurchases[static_cast<int>(StoreItem::STORE_ITEM_PLANT_COBCANNON)] > 0;
 	}
 	if (theSeedType == SeedType::SEED_IMITATER)
 	{
-		return mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_PLANT_IMITATER] > 0;
+		return mPlayerInfo->mPurchases[static_cast<int>(StoreItem::STORE_ITEM_PLANT_IMITATER)] > 0;
 	}
 
 	return theSeedType < GetSeedsAvailable();
@@ -2475,29 +2475,29 @@ ParticleSystemID LawnApp::ParticleGetID(TodParticleSystem* theParticle)
 
 ReanimationID LawnApp::ReanimationGetID(Reanimation* theReanimation)
 {
-	return (ReanimationID)mEffectSystem->mReanimationHolder->mReanimations.DataArrayGetID(theReanimation);
+	return static_cast<ReanimationID>(mEffectSystem->mReanimationHolder->mReanimations.DataArrayGetID(theReanimation));
 }
 
 TodParticleSystem* LawnApp::ParticleGet(ParticleSystemID theParticleID)
 {
-	return mEffectSystem->mParticleHolder->mParticleSystems.DataArrayGet((unsigned int)theParticleID);
+	return mEffectSystem->mParticleHolder->mParticleSystems.DataArrayGet(static_cast<unsigned int>(theParticleID));
 }
 
 TodParticleSystem* LawnApp::ParticleTryToGet(ParticleSystemID theParticleID)
 {
-	return mEffectSystem->mParticleHolder->mParticleSystems.DataArrayTryToGet((unsigned int)theParticleID);
+	return mEffectSystem->mParticleHolder->mParticleSystems.DataArrayTryToGet(static_cast<unsigned int>(theParticleID));
 }
 
 // GOTY @Patoke: 0x464B0F
 Reanimation* LawnApp::ReanimationGet(ReanimationID theReanimationID)
 {
-	return mEffectSystem->mReanimationHolder->mReanimations.DataArrayGet((unsigned int)theReanimationID);
+	return mEffectSystem->mReanimationHolder->mReanimations.DataArrayGet(static_cast<unsigned int>(theReanimationID));
 }
 
 //0x453CB0
 Reanimation* LawnApp::ReanimationTryToGet(ReanimationID theReanimationID)
 {
-	return mEffectSystem->mReanimationHolder->mReanimations.DataArrayTryToGet((unsigned int)theReanimationID);
+	return mEffectSystem->mReanimationHolder->mReanimations.DataArrayTryToGet(static_cast<unsigned int>(theReanimationID));
 }
 
 //0x453CF0
@@ -3127,7 +3127,7 @@ int LawnApp::GetNumPreloadingTasks()
 	int aTaskCount = 10;
 	if (mPlayerInfo)
 	{
-		for (SeedType i = SeedType::SEED_PEASHOOTER; i < SeedType::NUM_SEED_TYPES; i = (SeedType)((int)i + 1))
+		for (SeedType i = SeedType::SEED_PEASHOOTER; i < SeedType::NUM_SEED_TYPES; i = static_cast<SeedType>(static_cast<int>(i) + 1))
 		{
 			if (SeedTypeAvailable(i) || HasFinishedAdventure())
 			{
@@ -3135,7 +3135,7 @@ int LawnApp::GetNumPreloadingTasks()
 			}
 		}
 
-		for (ZombieType i = ZombieType::ZOMBIE_NORMAL; i < ZombieType::NUM_ZOMBIE_TYPES;i = (ZombieType)((int)i + 1))
+		for (ZombieType i = ZombieType::ZOMBIE_NORMAL; i < ZombieType::NUM_ZOMBIE_TYPES; i = static_cast<ZombieType>(static_cast<int>(i) + 1))
 		{
 			if (HasFinishedAdventure() || mPlayerInfo->mLevel >= GetZombieDefinition(i).mStartingLevel)
 			{
@@ -3184,7 +3184,7 @@ void LawnApp::PreloadForUser()
 
 	if (mPlayerInfo)
 	{
-		for (SeedType i = SeedType::SEED_PEASHOOTER; i < SeedType::NUM_SEED_TYPES; i = (SeedType)((int)i + 1))
+		for (SeedType i = SeedType::SEED_PEASHOOTER; i < SeedType::NUM_SEED_TYPES; i = static_cast<SeedType>(static_cast<int>(i) + 1))
 		{
 			if (SeedTypeAvailable(i) || HasFinishedAdventure())
 			{
@@ -3208,7 +3208,7 @@ void LawnApp::PreloadForUser()
 			}
 		}
 
-		for (ZombieType i = ZombieType::ZOMBIE_NORMAL; i < ZombieType::NUM_ZOMBIE_TYPES;i = (ZombieType)((int)i + 1))
+		for (ZombieType i = ZombieType::ZOMBIE_NORMAL; i < ZombieType::NUM_ZOMBIE_TYPES; i = static_cast<ZombieType>(static_cast<int>(i) + 1))
 		{
 			if (HasFinishedAdventure() || mPlayerInfo->mLevel >= GetZombieDefinition(i).mStartingLevel)
 			{
@@ -3456,7 +3456,7 @@ bool LawnApp::CanDoPinataMode()
 	if (mPlayerInfo == nullptr)
 		return false;
 
-	return mPlayerInfo->mChallengeRecords[(int)GameMode::GAMEMODE_TREE_OF_WISDOM - (int)GameMode::GAMEMODE_SURVIVAL_NORMAL_STAGE_1] >= 1000;
+	return mPlayerInfo->mChallengeRecords[static_cast<int>(GameMode::GAMEMODE_TREE_OF_WISDOM) - static_cast<int>(GameMode::GAMEMODE_SURVIVAL_NORMAL_STAGE_1)] >= 1000;
 }
 
 //0x456080
@@ -3465,7 +3465,7 @@ bool LawnApp::CanDoDanceMode()
 	if (mPlayerInfo == nullptr)
 		return false;
 
-	return mPlayerInfo->mChallengeRecords[(int)GameMode::GAMEMODE_TREE_OF_WISDOM - (int)GameMode::GAMEMODE_SURVIVAL_NORMAL_STAGE_1] >= 500;
+	return mPlayerInfo->mChallengeRecords[static_cast<int>(GameMode::GAMEMODE_TREE_OF_WISDOM) - static_cast<int>(GameMode::GAMEMODE_SURVIVAL_NORMAL_STAGE_1)] >= 500;
 }
 
 //0x4560A0
@@ -3474,7 +3474,7 @@ bool LawnApp::CanDoDaisyMode()
 	if (mPlayerInfo == nullptr)
 		return false;
 
-	return mPlayerInfo->mChallengeRecords[(int)GameMode::GAMEMODE_TREE_OF_WISDOM - (int)GameMode::GAMEMODE_SURVIVAL_NORMAL_STAGE_1] >= 100;
+	return mPlayerInfo->mChallengeRecords[static_cast<int>(GameMode::GAMEMODE_TREE_OF_WISDOM) - static_cast<int>(GameMode::GAMEMODE_SURVIVAL_NORMAL_STAGE_1)] >= 100;
 }
 
 //0x4560C0

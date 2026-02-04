@@ -48,7 +48,7 @@ void HSL_to_RGB(float h, float sl, float l, float& r, float& g, float& b)
 	float y = 2 * l - v;
 	float sv = (v - y) / v;
 	h *= 6.0f;
-	int sextant = ClampInt((int)h, 0, 5);
+	int sextant = ClampInt(static_cast<int>(h), 0, 5);
 	float vsf = v * sv * (h - sextant);
 	float x = y + vsf;
 	float z = v - vsf;
@@ -73,7 +73,7 @@ void FilterEffectInitForApp()
 //0x446F00
 void FilterEffectDisposeForApp()
 {
-	for (int i = 0; i < (int)FilterEffect::NUM_FILTER_EFFECTS; i++)
+	for (int i = 0; i < static_cast<int>(FilterEffect::NUM_FILTER_EFFECTS); i++)
 	{
 		ImageFilterMap& aFilterMap = gFilterMap[i];
 
@@ -96,9 +96,9 @@ void FilterEffectDoLumSat(MemoryImage* theImage, float theLum, float theSat)
 	{
 		for (int x = 0; x < theImage->mWidth; x++)
 		{
-			float b = (float)(*ptr & 255) / 255;
-			float g = (float)(*ptr >> 8 & 255) / 255;
-			float r = (float)(*ptr >> 16 & 255) / 255;
+			float b = static_cast<float>(*ptr & 255) / 255;
+			float g = static_cast<float>(*ptr >> 8 & 255) / 255;
+			float r = static_cast<float>(*ptr >> 16 & 255) / 255;
 			int a = *ptr >> 24 & 255;
 
 			float h, s, l;
@@ -170,7 +170,7 @@ Image* FilterEffectGetImage(Image* theImage, FilterEffect theFilterEffect)
 {
 	TOD_ASSERT(theFilterEffect >= 0 && theFilterEffect < FilterEffect::NUM_FILTER_EFFECTS);
 
-	ImageFilterMap& aFilterMap = gFilterMap[(int)theFilterEffect];
+	ImageFilterMap& aFilterMap = gFilterMap[static_cast<int>(theFilterEffect)];
 	ImageFilterMap::iterator it = aFilterMap.find(theImage);
 	if (it != aFilterMap.end())
 		return it->second;

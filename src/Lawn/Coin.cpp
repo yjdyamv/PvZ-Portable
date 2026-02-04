@@ -614,7 +614,7 @@ void Coin::UpdateCollected()
         aDestX = 39;
         aDestY = 558;
 
-        if (mApp->GetDialog((int)Dialogs::DIALOG_STORE))
+        if (mApp->GetDialog(static_cast<int>(Dialogs::DIALOG_STORE)))
         {
             aDestX = 662;
             aDestY = 546;
@@ -688,7 +688,7 @@ void Coin::UpdateCollected()
     {
         if (mCollectionDistance < 15.0f)
         {
-            if (!mBoard->mHelpDisplayed[(int)AdviceType::ADVICE_UNLOCKED_MODE])
+            if (!mBoard->mHelpDisplayed[static_cast<int>(AdviceType::ADVICE_UNLOCKED_MODE)])
             {
                 if (mType == CoinType::COIN_PRESENT_MINIGAMES)
                 {
@@ -992,7 +992,7 @@ void Coin::Draw(Graphics* g)
         }
 
         g->SetColorizeImages(true);
-        DrawSeedPacket(g, (int)mPosX, (int)mPosY, mUsableSeedType, SeedType::SEED_NONE, 0.0f, aGrayness, false, false);
+        DrawSeedPacket(g, static_cast<int>(mPosX), static_cast<int>(mPosY), mUsableSeedType, SeedType::SEED_NONE, 0.0f, aGrayness, false, false);
         g->SetColorizeImages(false);
 
         return;
@@ -1017,7 +1017,7 @@ void Coin::FanOutCoins(CoinType theCoinType, int theNumCoins)
         float aAngle = PI / 2 + PI * (i + 1) / (theNumCoins + 1);
         float aPosX = mPosX + 20.0f;
         float aPosY = mPosY;
-        Coin* aCoin = mBoard->AddCoin((int)aPosX, (int)aPosY, theCoinType, CoinMotion::COIN_MOTION_FROM_PRESENT);
+        Coin* aCoin = mBoard->AddCoin(static_cast<int>(aPosX), static_cast<int>(aPosY), theCoinType, CoinMotion::COIN_MOTION_FROM_PRESENT);
         aCoin->mVelX = 5.0f * sin(aAngle);
         aCoin->mVelY = 5.0f * cos(aAngle);
     }
@@ -1141,14 +1141,14 @@ void Coin::Collect()
         mBoard->mChocolateCollected++;
         mApp->AddTodParticle(mPosX + 30.0f, mPosY + 30.0f, mRenderOrder + 1, ParticleEffect::PARTICLE_PRESENT_PICKUP);
 
-        if (mApp->mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_CHOCOLATE] < PURCHASE_COUNT_OFFSET)
+        if (mApp->mPlayerInfo->mPurchases[static_cast<int>(StoreItem::STORE_ITEM_CHOCOLATE)] < PURCHASE_COUNT_OFFSET)
         {
             mBoard->DisplayAdvice("[ADVICE_FOUND_CHOCOLATE]", MessageStyle::MESSAGE_STYLE_HINT_TALL_FAST, AdviceType::ADVICE_NONE);
-            mApp->mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_CHOCOLATE] = PURCHASE_COUNT_OFFSET + 1;
+            mApp->mPlayerInfo->mPurchases[static_cast<int>(StoreItem::STORE_ITEM_CHOCOLATE)] = PURCHASE_COUNT_OFFSET + 1;
         }
         else
         {
-            mApp->mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_CHOCOLATE]++;
+            mApp->mPlayerInfo->mPurchases[static_cast<int>(StoreItem::STORE_ITEM_CHOCOLATE)]++;
         }
 
         mDisappearCounter = 0;
@@ -1252,9 +1252,9 @@ void Coin::Collect()
 
         mBoard->mCursorObject->mType = mUsableSeedType;
         mBoard->mCursorObject->mCursorType = CursorType::CURSOR_TYPE_PLANT_FROM_USABLE_COIN;
-        mBoard->mCursorObject->mCoinID = (CoinID)mBoard->mCoins.DataArrayGetID(this);
+        mBoard->mCursorObject->mCoinID = static_cast<CoinID>(mBoard->mCoins.DataArrayGetID(this));
 
-        mGroundY = (int)mPosY;
+        mGroundY = static_cast<int>(mPosY);
         mFadeCount = 0;
         return;
     }
@@ -1413,7 +1413,7 @@ void Coin::MouseDown(int x, int y, int theClickCount)
 // GOTY @Patoke: 0x435B20
 void Coin::Die()
 {
-    TOD_ASSERT(!mBoard || mBoard->mCursorObject->mCoinID != (CoinID)mBoard->mCoins.DataArrayGetID(this));
+    TOD_ASSERT(!mBoard || mBoard->mCursorObject->mCoinID != static_cast<CoinID>(mBoard->mCoins.DataArrayGetID(this)));
 
     mDead = true;
     AttachmentDie(mAttachmentID);

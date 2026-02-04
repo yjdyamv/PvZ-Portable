@@ -127,8 +127,8 @@ void Projectile::ProjectileInitialize(int theX, int theY, int theRenderOrder, in
 	}
 
 	mAnimCounter = 0;
-	mX = (int)mPosX;
-	mY = (int)mPosY;
+	mX = static_cast<int>(mPosX);
+	mY = static_cast<int>(mPosY);
 }
 
 //0x46CAA0
@@ -211,7 +211,7 @@ Zombie* Projectile::FindCollisionTarget()
 	Zombie* aZombie = nullptr;
 	while (mBoard->IterateZombies(aZombie))
 	{
-		if ((aZombie->mZombieType == ZombieType::ZOMBIE_BOSS || aZombie->mRow == mRow) && aZombie->EffectedByDamage((unsigned int)mDamageRangeFlags))
+		if ((aZombie->mZombieType == ZombieType::ZOMBIE_BOSS || aZombie->mRow == mRow) && aZombie->EffectedByDamage(static_cast<unsigned int>(mDamageRangeFlags)))
 		{
 			if (aZombie->mZombiePhase == ZombiePhase::PHASE_SNORKEL_WALKING_IN_POOL && mPosZ >= 45.0f)
 			{
@@ -256,7 +256,7 @@ void Projectile::CheckForCollision()
 	if (mMotionType == ProjectileMotion::MOTION_HOMING)
 	{
 		Zombie* aZombie = mBoard->ZombieTryToGet(mTargetZombieID);
-		if (aZombie && aZombie->EffectedByDamage((unsigned int)mDamageRangeFlags))
+		if (aZombie && aZombie->EffectedByDamage(static_cast<unsigned int>(mDamageRangeFlags)))
 		{
 			Rect aProjectileRect = GetProjectileRect();
 			Rect aZombieRect = aZombie->GetZombieRect();
@@ -386,20 +386,20 @@ unsigned int Projectile::GetDamageFlags(Zombie* theZombie)
 
 	if (IsSplashDamage(theZombie))
 	{
-		SetBit(aDamageFlags, (int)DamageFlags::DAMAGE_HITS_SHIELD_AND_BODY, true);
+		SetBit(aDamageFlags, static_cast<int>(DamageFlags::DAMAGE_HITS_SHIELD_AND_BODY), true);
 	}
 	else if (mMotionType == ProjectileMotion::MOTION_LOBBED || mMotionType == ProjectileMotion::MOTION_BACKWARDS)
 	{
-		SetBit(aDamageFlags, (int)DamageFlags::DAMAGE_BYPASSES_SHIELD, true);
+		SetBit(aDamageFlags, static_cast<int>(DamageFlags::DAMAGE_BYPASSES_SHIELD), true);
 	}
 	else if (mMotionType == ProjectileMotion::MOTION_STAR && mVelX < 0.0f)
 	{
-		SetBit(aDamageFlags, (int)DamageFlags::DAMAGE_BYPASSES_SHIELD, true);
+		SetBit(aDamageFlags, static_cast<int>(DamageFlags::DAMAGE_BYPASSES_SHIELD), true);
 	}
 
 	if (mProjectileType == ProjectileType::PROJECTILE_SNOWPEA || mProjectileType == ProjectileType::PROJECTILE_WINTERMELON)
 	{
-		SetBit(aDamageFlags, (int)DamageFlags::DAMAGE_FREEZE, true);
+		SetBit(aDamageFlags, static_cast<int>(DamageFlags::DAMAGE_FREEZE), true);
 	}
 
 	return aDamageFlags;
@@ -437,7 +437,7 @@ bool Projectile::IsZombieHitBySplash(Zombie* theZombie)
 		return false;
 	}
 
-	return theZombie->EffectedByDamage((unsigned int)mDamageRangeFlags) && GetRectOverlap(aProjectileRect, aZombieRect) >= 0;
+	return theZombie->EffectedByDamage(static_cast<unsigned int>(mDamageRangeFlags)) && GetRectOverlap(aProjectileRect, aZombieRect) >= 0;
 }
 
 //0x46D390
@@ -632,7 +632,7 @@ void Projectile::UpdateNormalMotion()
 	else if (mMotionType == ProjectileMotion::MOTION_HOMING)
 	{
 		Zombie* aZombie = mBoard->ZombieTryToGet(mTargetZombieID);
-		if (aZombie && aZombie->EffectedByDamage((unsigned int)mDamageRangeFlags))
+		if (aZombie && aZombie->EffectedByDamage(static_cast<unsigned int>(mDamageRangeFlags)))
 		{
 			Rect aZombieRect = aZombie->GetZombieRect();
 			SexyVector2 aTargetCenter(aZombie->ZombieTargetLeadX(0.0f), aZombieRect.mY + aZombieRect.mHeight / 2);
@@ -757,8 +757,8 @@ void Projectile::UpdateMotion()
 		mPosZ -= aSlopeHeightChange;
 	}
 	mShadowY += aSlopeHeightChange;
-	mX = (int)mPosX;
-	mY = (int)(mPosY + mPosZ);
+	mX = static_cast<int>(mPosX);
+	mY = static_cast<int>(mPosY + mPosZ);
 }
 
 //0x46DD30
@@ -1238,7 +1238,7 @@ void Projectile::ConvertToPea(int theGridX)
 
 ProjectileDefinition& Projectile::GetProjectileDef()
 {
-	ProjectileDefinition& aProjectileDef = gProjectileDefinition[(int)mProjectileType];
+	ProjectileDefinition& aProjectileDef = gProjectileDefinition[static_cast<int>(mProjectileType)];
 	TOD_ASSERT(aProjectileDef.mProjectileType == mProjectileType);
 
 	return aProjectileDef;

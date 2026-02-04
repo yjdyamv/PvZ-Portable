@@ -301,12 +301,12 @@ float TodCurveCubicS(float theTime)
 
 float TodCurvePoly(float theTime, float thePoly)
 {
-	return (float)pow(theTime, thePoly);
+	return static_cast<float>(pow(theTime, thePoly));
 }
 
 float TodCurveInvPoly(float theTime, float thePoly)
 {
-	return (float)pow(theTime - 1.0f, thePoly) + 1.0f;
+	return static_cast<float>(pow(theTime - 1.0f, thePoly)) + 1.0f;
 }
 
 float TodCurvePolyS(float theTime, float thePoly)
@@ -324,7 +324,7 @@ float TodCurveCircle(float theTime)
 	{
 		return 1.0f;
 	}
-	return 1.0f - (float)sqrt(1.0f - theTime * theTime);
+	return 1.0f - static_cast<float>(sqrt(1.0f - theTime * theTime));
 }
 
 float TodCurveInvCircle(float theTime)
@@ -333,7 +333,7 @@ float TodCurveInvCircle(float theTime)
 	{
 		return 0.0f;
 	}
-	return (float)sqrt(1.0f - (theTime - 1.0f) * (theTime - 1.0f));
+	return static_cast<float>(sqrt(1.0f - (theTime - 1.0f) * (theTime - 1.0f)));
 }
 
 //0x5119B0
@@ -399,7 +399,7 @@ float TodAnimateCurveFloat(int theTimeStart, int theTimeEnd, int theTimeAge, flo
 {
 	//return TodAnimateCurveFloatTime(theTimeStart, theTimeEnd, theTimeAge, thePositionStart, thePositionEnd, theCurve);
 
-	float aWarpedAge = (theTimeAge - theTimeStart) / (float)(theTimeEnd - theTimeStart);
+	float aWarpedAge = (theTimeAge - theTimeStart) / static_cast<float>(theTimeEnd - theTimeStart);
 	return TodCurveEvaluateClamped(aWarpedAge, thePositionStart, thePositionEnd, theCurve);
 }
 
@@ -466,18 +466,18 @@ void TodDrawStringMatrix(Graphics* g, const _Font* theFont, const SexyMatrix3& t
 
 	memset(gRenderTail, 0, sizeof(gRenderTail));
 	memset(gRenderHead, 0, sizeof(gRenderHead));
-	ImageFont* aFont = (ImageFont*)theFont;
+	ImageFont* aFont = reinterpret_cast<ImageFont*>(const_cast<_Font*>(theFont));
 	if (!aFont->mFontData->mInitialized)
 		return;
 
 	aFont->Prepare();
 	int aCurXPos = 0;
 	int aCurPoolIdx = 0;
-	for (int aCharNum = 0; aCharNum < (int)aFinalString.size(); aCharNum++)
+	for (int aCharNum = 0; aCharNum < static_cast<int>(aFinalString.size()); aCharNum++)
 	{
 		char aChar = aFont->GetMappedChar(aFinalString[aCharNum]);
 		char aNextChar = '\0';
-		if (aCharNum < (int)aFinalString.size() - 1)
+		if (aCharNum < static_cast<int>(aFinalString.size()) - 1)
 		{
 			aNextChar = aFont->GetMappedChar(aFinalString[aCharNum + 1]);
 		}
@@ -491,7 +491,7 @@ void TodDrawStringMatrix(Graphics* g, const _Font* theFont, const SexyMatrix3& t
 			int aLayerPointSize = aLayer->mPointSize;
 			if (aLayerPointSize)
 			{
-				aScale *= (float)aFont->mPointSize / (float)aLayerPointSize;
+				aScale *= static_cast<float>(aFont->mPointSize) / static_cast<float>(aLayerPointSize);
 			}
 
 			int anImageX, anImageY, aCharWidth, aSpacing;

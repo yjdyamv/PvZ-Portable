@@ -28,13 +28,13 @@ void PoolEffect::PoolEffectInitialize()
     mCausticImage->mBits[CAUSTIC_IMAGE_WIDTH * CAUSTIC_IMAGE_HEIGHT] = MEMORYCHECK_ID;
 
     mCausticGrayscaleImage = new unsigned char[256 * 256];
-    MemoryImage* aCausticGrayscaleImage = (MemoryImage*)IMAGE_POOL_CAUSTIC_EFFECT;
+    MemoryImage* aCausticGrayscaleImage = reinterpret_cast<MemoryImage*>(IMAGE_POOL_CAUSTIC_EFFECT);
     int index = 0;
     for (int x = 0; x < 256; x++)
     {
         for (int y = 0; y < 256; y++)
         {
-            mCausticGrayscaleImage[index] = (unsigned char)aCausticGrayscaleImage->mBits[index];
+            mCausticGrayscaleImage[index] = static_cast<unsigned char>(aCausticGrayscaleImage->mBits[index]);
             index++;
         }
     }
@@ -84,9 +84,9 @@ void PoolEffect::UpdateWaterEffect()
             int timeU = x << 17;
             int timePool0 = mPoolCounter << 16;
             int timePool1 = ((mPoolCounter & 65535) + 1) << 16;
-            int a1 = (unsigned char)BilinearLookupFixedPoint(timeU - timePool1 / 6, timeV1 + timePool0 / 8); //scroll speed
-            int a0 = (unsigned char)BilinearLookupFixedPoint(timeU + timePool0 / 10, timeV0); //scroll speed
-            unsigned char a = (unsigned char)((a0 + a1) / 2);
+            int a1 = static_cast<unsigned char>(BilinearLookupFixedPoint(timeU - timePool1 / 6, timeV1 + timePool0 / 8)); //scroll speed
+            int a0 = static_cast<unsigned char>(BilinearLookupFixedPoint(timeU + timePool0 / 10, timeV0)); //scroll speed
+            unsigned char a = static_cast<unsigned char>((a0 + a1) / 2);
 
             unsigned char alpha;
             if (a >= 160U)
@@ -102,7 +102,7 @@ void PoolEffect::UpdateWaterEffect()
                 alpha = 0;
             }
 
-            *pix = (*pix & 0x00FFFFFF) + (((int)alpha / 3) << 24); //alpha of caustic effect
+            *pix = (*pix & 0x00FFFFFF) + ((static_cast<int>(alpha) / 3) << 24); //alpha of caustic effect
             idx++;
         }
     }

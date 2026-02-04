@@ -792,7 +792,7 @@ enum ProjectileType : int
     NUM_PROJECTILES = 14
 };
 enum ReanimationType : unsigned int {
-    REANIM_NONE = (unsigned int)-1,
+    REANIM_NONE = static_cast<unsigned int>(-1),
     REANIM_LOADBAR_SPROUT = 0,
     REANIM_LOADBAR_ZOMBIEHEAD,
     REANIM_SODROLL,

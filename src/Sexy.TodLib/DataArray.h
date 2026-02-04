@@ -53,7 +53,7 @@ public:
 	void DataArrayInitialize(unsigned int theMaxSize, const char* theName)
 	{
 		TOD_ASSERT(mBlock == nullptr);
-		mBlock = (DataArrayItem*)operator new(sizeof(DataArrayItem) * theMaxSize);
+		mBlock = static_cast<DataArrayItem*>(operator new(sizeof(DataArrayItem) * theMaxSize));
 		mMaxSize = theMaxSize;
 		mNextKey = 1001U;
 		mName = theName;
@@ -76,7 +76,7 @@ public:
 
 	void DataArrayFree(T* theItem)
 	{
-		DataArrayItem* aItem = (DataArrayItem*)theItem;
+		DataArrayItem* aItem = reinterpret_cast<DataArrayItem*>(theItem);
 		TOD_ASSERT(DataArrayGet(aItem->mID) == theItem, "Failed: DataArrayFree(0x%x) in %s", theItem, mName);
 		theItem->~T();
 		unsigned int anId = aItem->mID & DATA_ARRAY_INDEX_MASK;
@@ -97,25 +97,25 @@ public:
 
 	inline unsigned int DataArrayGetID(T* theItem)
 	{
-		DataArrayItem* aItem = (DataArrayItem*)theItem;
+		DataArrayItem* aItem = reinterpret_cast<DataArrayItem*>(theItem);
 		TOD_ASSERT(DataArrayGet(aItem->mID) == theItem, "Failed: DataArrayGetID(0x%x) for %s", theItem, mName);
 		return aItem->mID;
 	}
 
 	bool IterateNext(T*& theItem)
 	{
-		DataArray<T>::DataArrayItem* aItem = (DataArray<T>::DataArrayItem*)theItem;
+		DataArray<T>::DataArrayItem* aItem = reinterpret_cast<DataArray<T>::DataArrayItem*>(theItem);
 		if (aItem == nullptr)
 			aItem = &mBlock[0];
 		else
 			aItem++;
 
 		DataArray<T>::DataArrayItem* aLast = &mBlock[mMaxUsedCount];
-		while ((intptr_t)aItem < (intptr_t)aLast)
+		while (aItem < aLast)
 		{
 			if (aItem->mID & DATA_ARRAY_KEY_MASK)
 			{
-				theItem = (T*)aItem;
+				theItem = reinterpret_cast<T*>(aItem);
 				return true;
 			}
 			aItem++;
@@ -143,7 +143,7 @@ public:
 		mSize++;
 
 		new (aNewItem)T();
-		return (T*)aNewItem;
+		return reinterpret_cast<T*>(aNewItem);
 	}
 
 	T* DataArrayTryToGet(unsigned int theId)
@@ -158,7 +158,7 @@ public:
 	T* DataArrayGet(unsigned int theId)
 	{
 		TOD_ASSERT(DataArrayTryToGet(theId) != nullptr, "Failed: DataArrayGet(0x%x) for %s", theId, mName);
-		return &mBlock[(short)theId].mItem;
+		return &mBlock[static_cast<short>(theId)].mItem;
 	}
 };
 

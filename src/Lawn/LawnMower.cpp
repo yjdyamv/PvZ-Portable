@@ -29,7 +29,7 @@ void LawnMower::LawnMowerInitialize(int theRow)
         mMowerType = LawnMowerType::LAWNMOWER_ROOF;
         aReanimType = ReanimationType::REANIM_ROOF_CLEANER;
     }
-    else if (mBoard->mPlantRow[mRow] == PlantRowType::PLANTROW_POOL && mApp->mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_POOL_CLEANER])
+    else if (mBoard->mPlantRow[mRow] == PlantRowType::PLANTROW_POOL && mApp->mPlayerInfo->mPurchases[static_cast<int>(StoreItem::STORE_ITEM_POOL_CLEANER)])
     {
         mMowerType = LawnMowerType::LAWNMOWER_POOL;
         aReanimType = ReanimationType::REANIM_POOL_CLEANER;

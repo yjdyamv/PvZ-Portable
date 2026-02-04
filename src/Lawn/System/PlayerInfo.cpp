@@ -184,7 +184,7 @@ void PlayerInfo::DeleteUserFiles()
 	std::string aFilename = GetAppDataPath(StrFormat("userdata/user%d.dat", mId));
 	gSexyAppBase->EraseFile(aFilename);
 
-	for (int i = 0; i < (int)GameMode::NUM_GAME_MODES; i++)
+	for (int i = 0; i < static_cast<int>(GameMode::NUM_GAME_MODES); i++)
 	{
 		std::string aFileName = GetSavedGameName((GameMode)i, mId);
 		gSexyAppBase->EraseFile(aFileName);

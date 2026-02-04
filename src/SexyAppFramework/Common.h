@@ -245,11 +245,11 @@ inline constexpr T LEConvert(T v) noexcept
 	if constexpr (std::endian::native == std::endian::big)
 	{
 		if constexpr (sizeof(T) == 2)
-			return (T)ByteSwap16((uint16_t)v);
+			return static_cast<T>(ByteSwap16(static_cast<uint16_t>(v)));
 		if constexpr (sizeof(T) == 4)
-			return (T)ByteSwap32((uint32_t)v);
+			return static_cast<T>(ByteSwap32(static_cast<uint32_t>(v)));
 		if constexpr (sizeof(T) == 8)
-			return (T)ByteSwap64((uint64_t)v);
+			return static_cast<T>(ByteSwap64(static_cast<uint64_t>(v)));
 	}
 	return v;
 }

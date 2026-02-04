@@ -264,7 +264,7 @@ int TodWriteString(Graphics* g, const std::string& theString, int theX, int theY
 		}
 	}
 
-	if (theLength < 0 || theOffset + theLength > (int)theString.size())
+	if (theLength < 0 || theOffset + theLength > static_cast<int>(theString.size()))
 		theLength = theString.size();
 	else
 		theLength = theOffset + theLength;  // 将 theLength 更改为子串结束位置
@@ -386,7 +386,7 @@ int TodDrawStringWrappedHelper(Graphics* g, const std::string& theText, const Re
 			int aLineWidth;
 			if (aSpacePos != -1)  // 如果本行前面的字符中存在空格字符
 			{
-				int aCurY = (int)g->mTransY + theRect.mY + aYOffset;
+				int aCurY = static_cast<int>(g->mTransY) + theRect.mY + aYOffset;
 				if (aCurY >= g->mClipRect.mY && aCurY <= g->mClipRect.mY + g->mClipRect.mHeight + aLineSpacing)  // 确保当前绘制位置纵坐标在裁剪范围内
 				{
 					TodWriteWordWrappedHelper(

@@ -202,7 +202,7 @@ bool                            TodParticleLoadADef(TodParticleDefinition* thePa
 void                            TodParticleLoadDefinitions(ParticleParams* theParticleParamArray, int theParticleParamArraySize);
 void                            TodParticleFreeDefinitions();
 
-extern ParticleParams gLawnParticleArray[(int)ParticleEffect::NUM_PARTICLES];  // 0x6A0FF0
+extern ParticleParams gLawnParticleArray[static_cast<int>(ParticleEffect::NUM_PARTICLES)];  // 0x6A0FF0
 
 // ######################################################################################################################################################
 // ############################################################ 以下正式开始粒子系统相关声明 ############################################################

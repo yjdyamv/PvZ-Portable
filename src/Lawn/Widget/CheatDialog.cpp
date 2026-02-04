@@ -18,7 +18,7 @@ CheatDialog::CheatDialog(LawnApp* theApp) : LawnDialog(theApp, Dialogs::DIALOG_C
 	std::string aCheatStr;
 	if (mApp->mGameMode != GameMode::GAMEMODE_ADVENTURE)
 	{
-		aCheatStr = StrFormat("C%d", (int)mApp->mGameMode);
+		aCheatStr = StrFormat("C%d", static_cast<int>(mApp->mGameMode));
 	}
 	else if (mApp->HasFinishedAdventure())
 	{

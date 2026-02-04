@@ -16,7 +16,7 @@ ReanimatorDefinition* gReanimatorDefArray;   //[0x6A9EE8]
 unsigned int gReanimationParamArraySize;              //[0x6A9EEC]
 ReanimationParams* gReanimationParamArray;   //[0x6A9EF0]
 
-ReanimationParams gLawnReanimationArray[(int)ReanimationType::NUM_REANIMS] = { //0x6A1340
+ReanimationParams gLawnReanimationArray[static_cast<int>(ReanimationType::NUM_REANIMS)] = { //0x6A1340
 	{ ReanimationType::REANIM_LOADBAR_SPROUT,                       "reanim/LoadBar_sprout.reanim",                    1 },
 	{ ReanimationType::REANIM_LOADBAR_ZOMBIEHEAD,                   "reanim/LoadBar_Zombiehead.reanim",                1 },
 	{ ReanimationType::REANIM_SODROLL,                              "reanim/SodRoll.reanim",                           0 },
@@ -335,13 +335,13 @@ void Reanimation::ReanimationInitializeType(float theX, float theY, ReanimationT
 	TOD_ASSERT(theReanimType >= 0 && theReanimType < gReanimatorDefCount);
 	ReanimatorEnsureDefinitionLoaded(theReanimType, false);
 	mReanimationType = theReanimType;
-	ReanimationInitialize(theX, theY, &gReanimatorDefArray[(int)theReanimType]);
+	ReanimationInitialize(theX, theY, &gReanimatorDefArray[static_cast<int>(theReanimType)]);
 }
 
 //0x471A90
 void ReanimationCreateAtlas(ReanimatorDefinition* theDefinition, ReanimationType theReanimationType)
 {
-	ReanimationParams& aParam = gReanimationParamArray[(int)theReanimationType];
+	ReanimationParams& aParam = gReanimationParamArray[static_cast<int>(theReanimationType)];
 	if (theDefinition->mReanimAtlas != nullptr || TestBit(aParam.mReanimParamFlags, ReanimFlags::REANIM_NO_ATLAS))
 		return;  // 当动画已存在 Atlas 或无需 Atlas 时，直接退出
 
@@ -362,7 +362,7 @@ void ReanimationPreload(ReanimationType theReanimationType)
 {
 	TOD_ASSERT(theReanimationType >= 0 && theReanimationType < gReanimatorDefCount);
 
-	ReanimatorDefinition* aReanimDef = &gReanimatorDefArray[(int)theReanimationType];
+	ReanimatorDefinition* aReanimDef = &gReanimatorDefArray[static_cast<int>(theReanimationType)];
 	ReanimationCreateAtlas(aReanimDef, theReanimationType);
 	if (aReanimDef->mReanimAtlas)
 	{
@@ -542,7 +542,7 @@ void Reanimation::GetCurrentTransform(int theTrackIndex, ReanimatorTransform* th
 	ReanimatorTrackInstance* aTrack = &mTrackInstances[theTrackIndex];
 	if (FloatRoundToInt(theTransformCurrent->mFrame) >= 0 && aTrack->mBlendCounter > 0)  // 若当前不为空白帧且轨道处于变换混合过程中
 	{
-		float aBlendFactor = aTrack->mBlendCounter / (float)aTrack->mBlendTime;
+		float aBlendFactor = aTrack->mBlendCounter / static_cast<float>(aTrack->mBlendTime);
 		BlendTransform(theTransformCurrent, *theTransformCurrent, aTrack->mBlendTransform, aBlendFactor);  // 结合覆写变换计算混合后的实际变换
 	}
 }
@@ -595,7 +595,7 @@ void Reanimation::MatrixFromTransform(const ReanimatorTransform& theTransform, S
 void Reanimation::ReanimBltMatrix(Graphics* g, Image* theImage, SexyMatrix3& theTransform, const Rect& theClipRect, const Color& theColor, int theDrawMode, const Rect& theSrcRect)
 {
 	if (!gSexyAppBase->Is3DAccelerated() &&  // 未开启 3D 硬件加速
-		TestBit(gReanimationParamArray[(int)mReanimationType].mReanimParamFlags, (int)ReanimFlags::REANIM_FAST_DRAW_IN_SW_MODE) &&  // 动画允许使用软件渲染
+		TestBit(gReanimationParamArray[static_cast<int>(mReanimationType)].mReanimParamFlags, static_cast<int>(ReanimFlags::REANIM_FAST_DRAW_IN_SW_MODE)) &&  // 动画允许使用软件渲染
 		FloatApproxEqual(theTransform.m01, 0.0f) && FloatApproxEqual(theTransform.m10, 0.0f) &&  // 横向和纵向的倾斜值均为 0
 		theTransform.m00 > 0.0f && theTransform.m11 > 0.0f &&  // 横向和纵向的拉伸值均大于 0
 		theColor == Color::White)
@@ -1120,10 +1120,10 @@ Reanimation* ReanimationHolder::AllocReanimation(float theX, float theY, int the
 void ReanimatorEnsureDefinitionLoaded(ReanimationType theReanimType, bool theIsPreloading)
 {
 	TOD_ASSERT(theReanimType >= 0 && theReanimType < gReanimatorDefCount);
-	ReanimatorDefinition* aReanimDef = &gReanimatorDefArray[(int)theReanimType];
+	ReanimatorDefinition* aReanimDef = &gReanimatorDefArray[static_cast<int>(theReanimType)];
 	if (aReanimDef->mTracks.tracks != nullptr)  // 如果轨道指针不为空指针，说明定义数据已经加载
 		return;
-	ReanimationParams* aReanimParams = &gReanimationParamArray[(int)theReanimType];
+	ReanimationParams* aReanimParams = &gReanimationParamArray[static_cast<int>(theReanimType)];
 	TodTrace("'%s'\n", aReanimParams->mReanimFileName);
 	if (theIsPreloading)
 	{

@@ -66,23 +66,23 @@ static const unsigned int SAVE4_CHUNK_VERSION = 1U;
 static void AppendU32LE(std::vector<unsigned char>& theOut, uint32_t theValue)
 {
 	unsigned char aBytes[4];
-	aBytes[0] = (unsigned char)(theValue & 0xFF);
-	aBytes[1] = (unsigned char)((theValue >> 8) & 0xFF);
-	aBytes[2] = (unsigned char)((theValue >> 16) & 0xFF);
-	aBytes[3] = (unsigned char)((theValue >> 24) & 0xFF);
+	aBytes[0] = static_cast<unsigned char>(theValue & 0xFF);
+	aBytes[1] = static_cast<unsigned char>((theValue >> 8) & 0xFF);
+	aBytes[2] = static_cast<unsigned char>((theValue >> 16) & 0xFF);
+	aBytes[3] = static_cast<unsigned char>((theValue >> 24) & 0xFF);
 	theOut.insert(theOut.end(), aBytes, aBytes + 4);
 }
 
 static void AppendBytes(std::vector<unsigned char>& theOut, const void* theData, size_t theLen)
 {
-	const unsigned char* aBytes = (const unsigned char*)theData;
+	const unsigned char* aBytes = reinterpret_cast<const unsigned char*>(theData);
 	theOut.insert(theOut.end(), aBytes, aBytes + theLen);
 }
 
 static void AppendChunk(std::vector<unsigned char>& theOut, uint32_t theChunkType, const std::vector<unsigned char>& theChunkData)
 {
 	AppendU32LE(theOut, theChunkType);
-	AppendU32LE(theOut, (uint32_t)theChunkData.size());
+	AppendU32LE(theOut, static_cast<uint32_t>(theChunkData.size()));
 	AppendBytes(theOut, theChunkData.data(), theChunkData.size());
 }
 
@@ -108,7 +108,10 @@ public:
 			theValue = 0;
 			return false;
 		}
-		theValue = (uint32_t)mData[mPos] | ((uint32_t)mData[mPos + 1] << 8) | ((uint32_t)mData[mPos + 2] << 16) | ((uint32_t)mData[mPos + 3] << 24);
+		theValue = static_cast<uint32_t>(mData[mPos]) |
+			(static_cast<uint32_t>(mData[mPos + 1]) << 8) |
+			(static_cast<uint32_t>(mData[mPos + 2]) << 16) |
+			(static_cast<uint32_t>(mData[mPos + 3]) << 24);
 		mPos += 4;
 		return true;
 	}
@@ -169,6 +172,16 @@ public:
 		}
 	}
 
+	void SyncBytes(const void* theData, uint32_t theDataLen)
+	{
+		if (mReading)
+		{
+			mFailed = true;
+			return;
+		}
+		mWriter->WriteBytes(theData, theDataLen);
+	}
+
 	void SyncBool(bool& theBool)
 	{
 		if (mReading)
@@ -215,7 +228,7 @@ public:
 		{
 			try
 			{
-				theValue = (int)mReader->ReadUInt32();
+				theValue = static_cast<int>(mReader->ReadUInt32());
 			}
 			catch (DataReaderException&)
 			{
@@ -225,7 +238,7 @@ public:
 		}
 		else
 		{
-			mWriter->WriteUInt32((uint32_t)theValue);
+			mWriter->WriteUInt32(static_cast<uint32_t>(theValue));
 		}
 	}
 
@@ -251,17 +264,17 @@ public:
 
 	void SyncUInt64(uint64_t& theValue)
 	{
-		uint32_t aLow = (uint32_t)(theValue & 0xFFFFFFFFULL);
-		uint32_t aHigh = (uint32_t)((theValue >> 32) & 0xFFFFFFFFULL);
+		uint32_t aLow = static_cast<uint32_t>(theValue & 0xFFFFFFFFULL);
+		uint32_t aHigh = static_cast<uint32_t>((theValue >> 32) & 0xFFFFFFFFULL);
 		SyncUInt32(aLow);
 		SyncUInt32(aHigh);
 		if (mReading)
-			theValue = ((uint64_t)aHigh << 32) | aLow;
+			theValue = (static_cast<uint64_t>(aHigh) << 32) | aLow;
 	}
 
 	void SyncInt64(int64_t& theValue)
 	{
-		uint64_t aValue = (uint64_t)theValue;
+		uint64_t aValue = static_cast<uint64_t>(theValue);
 		SyncUInt64(aValue);
 		if (mReading)
 			theValue = static_cast<int64_t>(aValue);
@@ -270,10 +283,10 @@ public:
 	template <typename TEnum>
 	void SyncEnum(TEnum& theEnum)
 	{
-		int aValue = (int)theEnum;
+		int aValue = static_cast<int>(theEnum);
 		SyncInt32(aValue);
 		if (mReading)
-			theEnum = (TEnum)aValue;
+			theEnum = static_cast<TEnum>(aValue);
 	}
 };
 
@@ -281,12 +294,12 @@ public:
 template <typename TObject, typename TField>
 static void SyncPodTail(PortableSaveContext& theContext, TObject& theObject, TField TObject::* theFirstField)
 {
-	unsigned char* aStart = (unsigned char*)&theObject;
-	unsigned char* aField = (unsigned char*)&(theObject.*theFirstField);
-	size_t aOffset = (size_t)(aField - aStart);
+	unsigned char* aStart = reinterpret_cast<unsigned char*>(&theObject);
+	unsigned char* aField = reinterpret_cast<unsigned char*>(&(theObject.*theFirstField));
+	size_t aOffset = static_cast<size_t>(aField - aStart);
 	if (aOffset < sizeof(TObject))
 	{
-		theContext.SyncBytes(aStart + aOffset, (uint32_t)(sizeof(TObject) - aOffset));
+		theContext.SyncBytes(aStart + aOffset, static_cast<uint32_t>(sizeof(TObject) - aOffset));
 	}
 }
 
@@ -331,13 +344,13 @@ static void SyncReanimationDefPortable(PortableSaveContext& theContext, Reanimat
 	{
 		int aReanimType = 0;
 		theContext.SyncInt32(aReanimType);
-		if (aReanimType == (int)ReanimationType::REANIM_NONE)
+		if (aReanimType == static_cast<int>(ReanimationType::REANIM_NONE))
 		{
 			theDefinition = nullptr;
 		}
-		else if (aReanimType >= 0 && aReanimType < (int)ReanimationType::NUM_REANIMS)
+		else if (aReanimType >= 0 && aReanimType < static_cast<int>(ReanimationType::NUM_REANIMS))
 		{
-			ReanimatorEnsureDefinitionLoaded((ReanimationType)aReanimType, true);
+			ReanimatorEnsureDefinitionLoaded(static_cast<ReanimationType>(aReanimType), true);
 			theDefinition = &gReanimatorDefArray[aReanimType];
 		}
 		else
@@ -347,8 +360,8 @@ static void SyncReanimationDefPortable(PortableSaveContext& theContext, Reanimat
 	}
 	else
 	{
-		int aReanimType = (int)ReanimationType::REANIM_NONE;
-		for (int i = 0; i < (int)ReanimationType::NUM_REANIMS; i++)
+		int aReanimType = static_cast<int>(ReanimationType::REANIM_NONE);
+		for (int i = 0; i < static_cast<int>(ReanimationType::NUM_REANIMS); i++)
 		{
 			ReanimatorDefinition* aDef = &gReanimatorDefArray[i];
 			if (theDefinition == aDef)
@@ -367,11 +380,11 @@ static void SyncParticleDefPortable(PortableSaveContext& theContext, TodParticle
 	{
 		int aParticleType = 0;
 		theContext.SyncInt32(aParticleType);
-		if (aParticleType == (int)ParticleEffect::PARTICLE_NONE)
+		if (aParticleType == static_cast<int>(ParticleEffect::PARTICLE_NONE))
 		{
 			theDefinition = nullptr;
 		}
-		else if (aParticleType >= 0 && aParticleType < (int)ParticleEffect::NUM_PARTICLES)
+		else if (aParticleType >= 0 && aParticleType < static_cast<int>(ParticleEffect::NUM_PARTICLES))
 		{
 			theDefinition = &gParticleDefArray[aParticleType];
 		}
@@ -382,8 +395,8 @@ static void SyncParticleDefPortable(PortableSaveContext& theContext, TodParticle
 	}
 	else
 	{
-		int aParticleType = (int)ParticleEffect::PARTICLE_NONE;
-		for (int i = 0; i < (int)ParticleEffect::NUM_PARTICLES; i++)
+		int aParticleType = static_cast<int>(ParticleEffect::PARTICLE_NONE);
+		for (int i = 0; i < static_cast<int>(ParticleEffect::NUM_PARTICLES); i++)
 		{
 			TodParticleDefinition* aDef = &gParticleDefArray[i];
 			if (theDefinition == aDef)
@@ -436,7 +449,7 @@ static void SyncImagePortable(PortableSaveContext& theContext, Image*& theImage)
 	if (theContext.mReading)
 	{
 		ResourceId aResID;
-		theContext.SyncInt32((int&)aResID);
+		theContext.SyncInt32(reinterpret_cast<int&>(aResID));
 		if (aResID == Sexy::ResourceId::RESOURCE_ID_MAX)
 		{
 			theImage = nullptr;
@@ -457,7 +470,7 @@ static void SyncImagePortable(PortableSaveContext& theContext, Image*& theImage)
 		{
 			aResID = Sexy::ResourceId::RESOURCE_ID_MAX;
 		}
-		theContext.SyncInt32((int&)aResID);
+		theContext.SyncInt32(reinterpret_cast<int&>(aResID));
 	}
 }
 
@@ -523,19 +536,19 @@ static void ResetItemForRead(T& theItem)
 template <typename TEnum>
 static void SyncEnum32(PortableSaveContext& theContext, TEnum& theValue)
 {
-	int aValue = (int)theValue;
+	int aValue = static_cast<int>(theValue);
 	theContext.SyncInt32(aValue);
 	if (theContext.mReading)
-		theValue = (TEnum)aValue;
+		theValue = static_cast<TEnum>(aValue);
 }
 
 template <typename TEnum>
 static void SyncEnumU32(PortableSaveContext& theContext, TEnum& theValue)
 {
-	uint32_t aValue = (uint32_t)theValue;
+	uint32_t aValue = static_cast<uint32_t>(theValue);
 	theContext.SyncUInt32(aValue);
 	if (theContext.mReading)
-		theValue = (TEnum)aValue;
+		theValue = static_cast<TEnum>(aValue);
 }
 
 template <typename TEnum>
@@ -995,7 +1008,7 @@ static void AppendFieldWithSync(std::vector<unsigned char>& theOut, uint32_t the
 	aFieldData.resize(aWriter.GetDataLen());
 	memcpy(aFieldData.data(), aWriter.GetDataPtr(), aWriter.GetDataLen());
 	AppendU32LE(theOut, theFieldId);
-	AppendU32LE(theOut, (uint32_t)aFieldData.size());
+	AppendU32LE(theOut, static_cast<uint32_t>(aFieldData.size()));
 	AppendBytes(theOut, aFieldData.data(), aFieldData.size());
 }
 
@@ -1003,7 +1016,7 @@ template <typename TReaderFn>
 static bool ApplyFieldWithSync(const unsigned char* theData, size_t theSize, TReaderFn theReaderFn)
 {
 	DataReader aReader;
-	aReader.OpenMemory(theData, (uint32_t)theSize, false);
+	aReader.OpenMemory(theData, static_cast<uint32_t>(theSize), false);
 	PortableSaveContext aContext(aReader);
 	theReaderFn(aContext);
 	return !aContext.mFailed;
@@ -1045,10 +1058,10 @@ static bool ReadPodTailField(const unsigned char* theData, size_t theSize, TObje
 
 static void WriteTLVBlob(PortableSaveContext& theContext, const std::vector<unsigned char>& theBlob)
 {
-	uint32_t aSize = (uint32_t)theBlob.size();
+	uint32_t aSize = static_cast<uint32_t>(theBlob.size());
 	theContext.SyncUInt32(aSize);
 	if (aSize > 0)
-		theContext.SyncBytes((void*)theBlob.data(), aSize);
+		theContext.SyncBytes(theBlob.data(), aSize);
 }
 
 static bool ReadTLVBlob(PortableSaveContext& theContext, std::vector<unsigned char>& theBlob)
@@ -1089,7 +1102,7 @@ static void SyncReanimTrackInstancePortable(PortableSaveContext& theContext, Rea
 	theContext.SyncFloat(theTrackInstance.mShakeOverride);
 	theContext.SyncFloat(theTrackInstance.mShakeX);
 	theContext.SyncFloat(theTrackInstance.mShakeY);
-	theContext.SyncInt32((int&)theTrackInstance.mAttachmentID);
+	theContext.SyncInt32(reinterpret_cast<int&>(theTrackInstance.mAttachmentID));
 	SyncImagePortable(theContext, theTrackInstance.mImageOverride);
 	theContext.SyncInt32(theTrackInstance.mRenderGroup);
 	SyncColorPortable(theContext, theTrackInstance.mTrackColor);
@@ -1109,13 +1122,13 @@ static void SyncReanimationPortable(Board* theBoard, Reanimation* theReanimation
 
 	ReanimatorDefinition* aDef = theReanimation->mDefinition;
 	ReanimatorDefinition* aDefStart = gReanimatorDefArray;
-	ReanimatorDefinition* aDefEnd = gReanimatorDefArray + (int)ReanimationType::NUM_REANIMS;
+	ReanimatorDefinition* aDefEnd = gReanimatorDefArray + static_cast<int>(ReanimationType::NUM_REANIMS);
 	if (aDef == nullptr || aDef < aDefStart || aDef >= aDefEnd)
 	{
-		int aType = (int)theReanimation->mReanimationType;
-		if (aType >= 0 && aType < (int)ReanimationType::NUM_REANIMS)
+		int aType = static_cast<int>(theReanimation->mReanimationType);
+		if (aType >= 0 && aType < static_cast<int>(ReanimationType::NUM_REANIMS))
 		{
-			ReanimatorEnsureDefinitionLoaded((ReanimationType)aType, true);
+			ReanimatorEnsureDefinitionLoaded(static_cast<ReanimationType>(aType), true);
 			aDef = &gReanimatorDefArray[aType];
 			if (theContext.mReading)
 				theReanimation->mDefinition = aDef;
@@ -1152,7 +1165,8 @@ static void SyncReanimationPortable(Board* theBoard, Reanimation* theReanimation
 		bool aUseTemp = (theReanimation->mTrackInstances == nullptr);
 		if (theContext.mReading)
 		{
-			theReanimation->mTrackInstances = (ReanimatorTrackInstance*)FindGlobalAllocator(aCount * sizeof(ReanimatorTrackInstance))->Calloc(aCount * sizeof(ReanimatorTrackInstance));
+			theReanimation->mTrackInstances = reinterpret_cast<ReanimatorTrackInstance*>(
+				FindGlobalAllocator(aCount * sizeof(ReanimatorTrackInstance))->Calloc(aCount * sizeof(ReanimatorTrackInstance)));
 			if (theReanimation->mTrackInstances == nullptr)
 			{
 				aUseTemp = true;
@@ -1202,7 +1216,7 @@ static void SyncParticlePortable(TodParticle* theParticle, PortableSaveContext& 
 	theContext.SyncInt32(theParticle->mImageFrame);
 	theContext.SyncFloat(theParticle->mSpinPosition);
 	theContext.SyncFloat(theParticle->mSpinVelocity);
-	theContext.SyncInt32((int&)theParticle->mCrossFadeParticleID);
+	theContext.SyncInt32(reinterpret_cast<int&>(theParticle->mCrossFadeParticleID));
 	theContext.SyncInt32(theParticle->mCrossFadeDuration);
 	for (int i = 0; i < ParticleTracks::NUM_PARTICLE_TRACKS; i++)
 		theContext.SyncFloat(theParticle->mParticleInterp[i]);
@@ -1224,7 +1238,8 @@ static void SyncParticleEmitterPortable(TodParticleSystem* theParticleSystem, To
 	}
 	else
 	{
-		aEmitterDefIndex = ((intptr_t)theParticleEmitter->mEmitterDef - (intptr_t)theParticleSystem->mParticleDef->mEmitterDefs) / sizeof(TodEmitterDefinition);
+		aEmitterDefIndex = (reinterpret_cast<intptr_t>(theParticleEmitter->mEmitterDef) -
+			reinterpret_cast<intptr_t>(theParticleSystem->mParticleDef->mEmitterDefs)) / sizeof(TodEmitterDefinition);
 		theContext.SyncInt32(aEmitterDefIndex);
 	}
 
@@ -1241,7 +1256,7 @@ static void SyncParticleEmitterPortable(TodParticleSystem* theParticleSystem, To
 	theContext.SyncBool(theParticleEmitter->mDead);
 	theContext.SyncBool(theParticleEmitter->mExtraAdditiveDrawOverride);
 	theContext.SyncFloat(theParticleEmitter->mScaleOverride);
-	theContext.SyncInt32((int&)theParticleEmitter->mCrossFadeEmitterID);
+		theContext.SyncInt32(reinterpret_cast<int&>(theParticleEmitter->mCrossFadeEmitterID));
 	theContext.SyncInt32(theParticleEmitter->mEmitterCrossFadeCountDown);
 	theContext.SyncInt32(theParticleEmitter->mFrameOverride);
 	for (int i = 0; i < ParticleSystemTracks::NUM_SYSTEM_TRACKS; i++)
@@ -1254,7 +1269,7 @@ static void SyncParticleEmitterPortable(TodParticleSystem* theParticleSystem, To
 
 	for (TodListNode<ParticleID>* aNode = theParticleEmitter->mParticleList.mHead; aNode != nullptr; aNode = aNode->mNext)
 	{
-		TodParticle* aParticle = theParticleSystem->mParticleHolder->mParticles.DataArrayGet((unsigned int)aNode->mValue);
+		TodParticle* aParticle = theParticleSystem->mParticleHolder->mParticles.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		if (theContext.mReading)
 		{
 			aParticle->mParticleEmitter = theParticleEmitter;
@@ -1274,7 +1289,7 @@ static void SyncParticleSystemPortable(Board* theBoard, TodParticleSystem* thePa
 	SyncDataIDListPortable((TodList<unsigned int>*)&theParticleSystem->mEmitterList, theContext, &theParticleSystem->mParticleHolder->mEmitterListNodeAllocator);
 	for (TodListNode<ParticleEmitterID>* aNode = theParticleSystem->mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
 	{
-		TodParticleEmitter* aEmitter = theParticleSystem->mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue);
+		TodParticleEmitter* aEmitter = theParticleSystem->mParticleHolder->mEmitters.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		SyncParticleEmitterPortable(theParticleSystem, aEmitter, theContext);
 	}
 
@@ -1395,7 +1410,7 @@ static void SyncDataArrayPortableTLV(PortableSaveContext& theContext, DataArray<
 			if (aActive)
 			{
 				theWriteFn(aItemData, theDataArray.mBlock[i].mItem);
-				aItemSize = (uint32_t)aItemData.size();
+				aItemSize = static_cast<uint32_t>(aItemData.size());
 			}
 			theContext.SyncUInt32(aItemSize);
 			if (aItemSize > 0)
@@ -1513,7 +1528,7 @@ static void SyncBoardBasePortable(PortableSaveContext& theContext, Board* theBoa
 			case 87U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mIntervalDrawCountStart); }); break;
 			case 88U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncFloat(theBoard->mMinFPS); }); break;
 			case 89U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPreloadTime); }); break;
-			case 90U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ int64_t aGameId = static_cast<int64_t>(theBoard->mGameID); c.SyncInt64(aGameId); if (c.mReading) theBoard->mGameID = (intptr_t)aGameId; }); break;
+			case 90U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ int64_t aGameId = static_cast<int64_t>(theBoard->mGameID); c.SyncInt64(aGameId); if (c.mReading) theBoard->mGameID = static_cast<intptr_t>(aGameId); }); break;
 			case 91U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mGravesCleared); }); break;
 			case 92U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlantsEaten); }); break;
 			case 93U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlantsShoveled); }); break;
@@ -1623,7 +1638,7 @@ static void SyncBoardBasePortable(PortableSaveContext& theContext, Board* theBoa
 		AppendFieldWithSync(aBlob, 87U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mIntervalDrawCountStart); });
 		AppendFieldWithSync(aBlob, 88U, [&](PortableSaveContext& c){ c.SyncFloat(theBoard->mMinFPS); });
 		AppendFieldWithSync(aBlob, 89U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPreloadTime); });
-		AppendFieldWithSync(aBlob, 90U, [&](PortableSaveContext& c){ int64_t aGameId = static_cast<int64_t>(theBoard->mGameID); c.SyncInt64(aGameId); if (c.mReading) theBoard->mGameID = (intptr_t)aGameId; });
+		AppendFieldWithSync(aBlob, 90U, [&](PortableSaveContext& c){ int64_t aGameId = static_cast<int64_t>(theBoard->mGameID); c.SyncInt64(aGameId); if (c.mReading) theBoard->mGameID = static_cast<intptr_t>(aGameId); });
 		AppendFieldWithSync(aBlob, 91U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mGravesCleared); });
 		AppendFieldWithSync(aBlob, 92U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlantsEaten); });
 		AppendFieldWithSync(aBlob, 93U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlantsShoveled); });
@@ -2034,7 +2049,7 @@ static void SyncSeedPacketsPortable(PortableSaveContext& theContext, Board* theB
 			std::vector<unsigned char> aItemData;
 			WriteGameObjectField(aItemData, 1U, theBoard->mSeedBank->mSeedPackets[i]);
 			AppendFieldWithSync(aItemData, PORTABLE_FIELD_TAIL, [&](PortableSaveContext& c){ SyncSeedPacketTailPortable(c, theBoard->mSeedBank->mSeedPackets[i]); });
-			uint32_t aItemSize = (uint32_t)aItemData.size();
+			uint32_t aItemSize = static_cast<uint32_t>(aItemData.size());
 			theContext.SyncUInt32(aItemSize);
 			if (aItemSize > 0)
 				theContext.SyncBytes(aItemData.data(), aItemSize);
@@ -2201,7 +2216,7 @@ static bool WriteChunkV4(std::vector<unsigned char>& thePayload, uint32_t theChu
 	aChunkWriter.OpenMemory(0x200);
 	aChunkWriter.WriteUInt32(SAVE4_CHUNK_VERSION);
 	aChunkWriter.WriteUInt32(1U);
-	aChunkWriter.WriteUInt32((uint32_t)aFieldWriter.GetDataLen());
+	aChunkWriter.WriteUInt32(static_cast<uint32_t>(aFieldWriter.GetDataLen()));
 	aChunkWriter.WriteBytes(aFieldWriter.GetDataPtr(), aFieldWriter.GetDataLen());
 
 	std::vector<unsigned char> aChunk;
@@ -2240,7 +2255,7 @@ static bool ReadChunkV4(uint32_t theChunkType, const unsigned char* theData, siz
 		if (aFieldId == 1U)
 		{
 			DataReader aFieldReader;
-			aFieldReader.OpenMemory(aFieldData, (uint32_t)aFieldSize, false);
+			aFieldReader.OpenMemory(aFieldData, static_cast<uint32_t>(aFieldSize), false);
 			PortableSaveContext aContext(aFieldReader);
 			aSyncFn(aContext, theBoard);
 			if (aContext.mFailed)
@@ -2257,7 +2272,7 @@ static bool LawnLoadGameV4(Board* theBoard, const std::string& theFilePath)
 	Buffer aBuffer;
 	if (!gSexyAppBase->ReadBufferFromFile(theFilePath, &aBuffer, false))
 		return false;
-	if ((unsigned int)aBuffer.GetDataLen() < sizeof(SaveFileHeaderV4))
+	if (static_cast<unsigned int>(aBuffer.GetDataLen()) < sizeof(SaveFileHeaderV4))
 		return false;
 
 	SaveFileHeaderV4 aHeader;
@@ -2269,7 +2284,7 @@ static bool LawnLoadGameV4(Board* theBoard, const std::string& theFilePath)
 		return false;
 	if (aHeader.mVersion != SAVE_FILE_V4_VERSION)
 		return false;
-	if (aHeader.mPayloadSize + sizeof(SaveFileHeaderV4) > (unsigned int)aBuffer.GetDataLen())
+	if (aHeader.mPayloadSize + sizeof(SaveFileHeaderV4) > static_cast<unsigned int>(aBuffer.GetDataLen()))
 		return false;
 
 	unsigned char* aPayload = (unsigned char*)aBuffer.GetDataPtr() + sizeof(SaveFileHeaderV4);
@@ -2368,13 +2383,13 @@ void SaveGameContext::SyncReanimationDef(ReanimatorDefinition*& theDefinition)
 	{
 		int aReanimType;
 		SyncInt(aReanimType);
-		if (aReanimType == (int)ReanimationType::REANIM_NONE)
+		if (aReanimType == static_cast<int>(ReanimationType::REANIM_NONE))
 		{
 			theDefinition = nullptr;
 		}
-		else if (aReanimType >= 0 && aReanimType < (int)ReanimationType::NUM_REANIMS)
+		else if (aReanimType >= 0 && aReanimType < static_cast<int>(ReanimationType::NUM_REANIMS))
 		{
-			ReanimatorEnsureDefinitionLoaded((ReanimationType)aReanimType, true);
+			ReanimatorEnsureDefinitionLoaded(static_cast<ReanimationType>(aReanimType), true);
 			theDefinition = &gReanimatorDefArray[aReanimType];
 		}
 		else
@@ -2384,8 +2399,8 @@ void SaveGameContext::SyncReanimationDef(ReanimatorDefinition*& theDefinition)
 	}
 	else
 	{
-		int aReanimType = (int)ReanimationType::REANIM_NONE;
-		for (int i = 0; i < (int)ReanimationType::NUM_REANIMS; i++)
+		int aReanimType = static_cast<int>(ReanimationType::REANIM_NONE);
+		for (int i = 0; i < static_cast<int>(ReanimationType::NUM_REANIMS); i++)
 		{
 			ReanimatorDefinition* aDef = &gReanimatorDefArray[i];
 			if (theDefinition == aDef)
@@ -2405,11 +2420,11 @@ void SaveGameContext::SyncParticleDef(TodParticleDefinition*& theDefinition)
 	{
 		int aParticleType;
 		SyncInt(aParticleType);
-		if (aParticleType == (int)ParticleEffect::PARTICLE_NONE)
+		if (aParticleType == static_cast<int>(ParticleEffect::PARTICLE_NONE))
 		{
 			theDefinition = nullptr;
 		}
-		else if (aParticleType >= 0 && aParticleType < (int)ParticleEffect::NUM_PARTICLES)
+		else if (aParticleType >= 0 && aParticleType < static_cast<int>(ParticleEffect::NUM_PARTICLES))
 		{
 			theDefinition = &gParticleDefArray[aParticleType];
 		}
@@ -2420,8 +2435,8 @@ void SaveGameContext::SyncParticleDef(TodParticleDefinition*& theDefinition)
 	}
 	else
 	{
-		int aParticleType = (int)ParticleEffect::PARTICLE_NONE;
-		for (int i = 0; i < (int)ParticleEffect::NUM_PARTICLES; i++)
+		int aParticleType = static_cast<int>(ParticleEffect::PARTICLE_NONE);
+		for (int i = 0; i < static_cast<int>(ParticleEffect::NUM_PARTICLES); i++)
 		{
 			TodParticleDefinition* aDef = &gParticleDefArray[i];
 			if (theDefinition == aDef)
@@ -2554,7 +2569,8 @@ void SyncParticleEmitter(TodParticleSystem* theParticleSystem, TodParticleEmitte
 	}
 	else
 	{
-		aEmitterDefIndex = ((intptr_t)theParticleEmitter->mEmitterDef - (intptr_t)theParticleSystem->mParticleDef->mEmitterDefs) / sizeof(TodEmitterDefinition);
+		aEmitterDefIndex = (reinterpret_cast<intptr_t>(theParticleEmitter->mEmitterDef) -
+			reinterpret_cast<intptr_t>(theParticleSystem->mParticleDef->mEmitterDefs)) / sizeof(TodEmitterDefinition);
 		theContext.SyncInt(aEmitterDefIndex);
 	}
 
@@ -2562,7 +2578,7 @@ void SyncParticleEmitter(TodParticleSystem* theParticleSystem, TodParticleEmitte
 	SyncDataIDList((TodList<unsigned int>*)&theParticleEmitter->mParticleList, theContext, &theParticleSystem->mParticleHolder->mParticleListNodeAllocator);
 	for (TodListNode<ParticleID>* aNode = theParticleEmitter->mParticleList.mHead; aNode != nullptr; aNode = aNode->mNext)
 	{
-		TodParticle* aParticle = theParticleSystem->mParticleHolder->mParticles.DataArrayGet((unsigned int)aNode->mValue);
+		TodParticle* aParticle = theParticleSystem->mParticleHolder->mParticles.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		if (theContext.mReading)
 		{
 			aParticle->mParticleEmitter = theParticleEmitter;
@@ -2582,7 +2598,7 @@ void SyncParticleSystem(Board* theBoard, TodParticleSystem* theParticleSystem, S
 	SyncDataIDList((TodList<unsigned int>*)&theParticleSystem->mEmitterList, theContext, &theParticleSystem->mParticleHolder->mEmitterListNodeAllocator);
 	for (TodListNode<ParticleEmitterID>* aNode = theParticleSystem->mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
 	{
-		TodParticleEmitter* aEmitter = theParticleSystem->mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue);
+		TodParticleEmitter* aEmitter = theParticleSystem->mParticleHolder->mEmitters.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		SyncParticleEmitter(theParticleSystem, aEmitter, theContext);
 	}
 }
@@ -2699,7 +2715,7 @@ void SyncBoard(SaveGameContext& theContext, Board* theBoard)
 			theContext.mFailed = true;
 		}
 
-		if (theContext.mFailed || (unsigned int)theContext.mBuffer.ReadLong() != SAVE_FILE_MAGIC_NUMBER)
+		if (theContext.mFailed || static_cast<unsigned int>(theContext.mBuffer.ReadLong()) != SAVE_FILE_MAGIC_NUMBER)
 		{
 			theContext.mFailed = true;
 		}
@@ -2944,15 +2960,15 @@ bool LawnSaveGame(Board* theBoard, const std::string& theFilePath)
 	SaveFileHeaderV4 aHeader{};
 	memcpy(aHeader.mMagic, SAVE_FILE_MAGIC_V4, sizeof(aHeader.mMagic));
 	aHeader.mVersion = ToLE32(SAVE_FILE_V4_VERSION);
-	aHeader.mPayloadSize = ToLE32((unsigned int)aPayload.size());
-	aHeader.mPayloadCrc = ToLE32(crc32(0, (Bytef*)aPayload.data(), (unsigned int)aPayload.size()));
+	aHeader.mPayloadSize = ToLE32(static_cast<unsigned int>(aPayload.size()));
+	aHeader.mPayloadCrc = ToLE32(crc32(0, reinterpret_cast<Bytef*>(aPayload.data()), static_cast<unsigned int>(aPayload.size())));
 
 	std::vector<unsigned char> aOutBuffer;
 	aOutBuffer.resize(sizeof(aHeader) + aPayload.size());
 	memcpy(aOutBuffer.data(), &aHeader, sizeof(aHeader));
 	memcpy(aOutBuffer.data() + sizeof(aHeader), aPayload.data(), aPayload.size());
 
-	return gSexyAppBase->WriteBytesToFile(theFilePath, aOutBuffer.data(), (int)aOutBuffer.size());
+	return gSexyAppBase->WriteBytesToFile(theFilePath, aOutBuffer.data(), static_cast<int>(aOutBuffer.size()));
 }
 
 bool LawnSaveGameLegacy(Board* theBoard, const std::string& theFilePath)

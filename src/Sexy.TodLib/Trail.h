@@ -36,7 +36,7 @@ public:
 extern int gTrailParamArraySize;  //[0x6A9F28]
 extern TrailParams* gTrailParamArray;  //[0x6A9F2C]
 
-extern TrailParams gLawnTrailArray[(int)TrailType::NUM_TRAILS];  //0x6A19F4
+extern TrailParams gLawnTrailArray[static_cast<int>(TrailType::NUM_TRAILS)];  //0x6A19F4
 
 class TrailDefinition
 {

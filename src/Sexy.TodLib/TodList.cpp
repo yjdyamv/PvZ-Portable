@@ -5,7 +5,7 @@
 
 void TodAllocator::Initialize(int theGrowCount, int theItemSize)
 {
-	TOD_ASSERT((size_t)theItemSize >= sizeof(void*));
+	TOD_ASSERT(static_cast<size_t>(theItemSize) >= sizeof(void*));
 
 	mFreeList = nullptr;
 	mBlockList = nullptr;
@@ -23,19 +23,19 @@ void TodAllocator::Dispose()
 void TodAllocator::Grow()
 {
 	TOD_ASSERT(mGrowCount > 0);
-	TOD_ASSERT((size_t)mItemSize >= sizeof(void*));
+	TOD_ASSERT(static_cast<size_t>(mItemSize) >= sizeof(void*));
 
 	void* aBlock = TodMalloc(mGrowCount * mItemSize + sizeof(void*));
 	*(void**)aBlock = mBlockList;
 	mBlockList = aBlock;
 
 	void* aFreeList = mFreeList;
-	void* aItem = (void*)((uintptr_t)aBlock + sizeof(void*));
+	void* aItem = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(aBlock) + sizeof(void*));
 	for (int i = 0; i < mGrowCount; i++)
 	{
 		*(void**)aItem = aFreeList;
 		aFreeList = aItem;
-		aItem = (void*)((uintptr_t)aItem + mItemSize);
+		aItem = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(aItem) + mItemSize);
 	}
 	mFreeList = aFreeList;
 }

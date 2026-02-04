@@ -299,7 +299,7 @@ void GridItem::DrawCrater(Graphics* g)
 //0x44DB00
 void GridItem::DrawScaryPot(Graphics* g)
 {
-    int aImageCol = (int)mGridItemState - (int)GridItemState::GRIDITEM_STATE_SCARY_POT_QUESTION;
+    int aImageCol = static_cast<int>(mGridItemState) - static_cast<int>(GridItemState::GRIDITEM_STATE_SCARY_POT_QUESTION);
     TOD_ASSERT(aImageCol >= 0 && aImageCol < 3);
 
     int aXPos = mBoard->GridToPixelX(mGridX, mGridY) - 5;
@@ -528,7 +528,7 @@ void GridItem::UpdatePortal()
 //0x44E520
 void GridItem::UpdateScaryPot()
 {
-    if (mApp->mTodCheatKeys && mApp->mWidgetManager->mKeyDown[(int)KeyCode::KEYCODE_SHIFT])
+    if (mApp->mTodCheatKeys && mApp->mWidgetManager->mKeyDown[static_cast<int>(KeyCode::KEYCODE_SHIFT)])
     {
         if (mTransparentCounter < 50)
         {

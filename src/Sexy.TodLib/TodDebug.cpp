@@ -224,5 +224,5 @@ void TodAssertInitForApp()
 	strcpy(gLogFileName + strlen(gLogFileName), "log.txt");
 	TOD_ASSERT(strlen(gLogFileName) < 512);
 
-	TodLog("Started %d\n", (uint64_t)time(nullptr));
+	TodLog("Started %d\n", static_cast<uint64_t>(time(nullptr)));
 }

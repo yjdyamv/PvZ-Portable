@@ -6,7 +6,7 @@
 int gFoleyParamArraySize;        //[0x6A9F04]
 FoleyParams* gFoleyParamArray;   //[0x6A9F00]
 
-FoleyParams gLawnFoleyParamArray[(int)FoleyType::NUM_FOLEY] = {  //0x69FAD0
+FoleyParams gLawnFoleyParamArray[static_cast<int>(FoleyType::NUM_FOLEY)] = {  //0x69FAD0
 	{ FoleyType::FOLEY_SUN,                     10.0f,  { &Sexy::SOUND_POINTS}, 0U },
 	{ FoleyType::FOLEY_SPLAT,                   10.0f,  { &Sexy::SOUND_SPLAT, &Sexy::SOUND_SPLAT2, &Sexy::SOUND_SPLAT3}, 0U },
 	{ FoleyType::FOLEY_LAWNMOWER,               10.0f,  { &Sexy::SOUND_LAWNMOWER}, 0U },
@@ -183,7 +183,7 @@ void SoundSystemReleaseFinishedInstances(TodFoley* theSoundSystem)
 //0x514FE0
 bool SoundSystemHasFoleyPlayedTooRecently(TodFoley* theSoundSystem, FoleyType theFoleyType)
 {
-	FoleyTypeData* aFoleyData = &theSoundSystem->mFoleyTypeData[(int)theFoleyType];
+	FoleyTypeData* aFoleyData = &theSoundSystem->mFoleyTypeData[static_cast<int>(theFoleyType)];
 	for (int i = 0; i < MAX_FOLEY_INSTANCES; i++)
 	{
 		FoleyInstance* aFoleyInstance = &aFoleyData->mFoleyInstances[i];
@@ -197,14 +197,14 @@ FoleyParams* LookupFoley(FoleyType theFoleyType)
 {
 	TOD_ASSERT(theFoleyType >= 0 && theFoleyType < gFoleyParamArraySize);
 	TOD_ASSERT(gFoleyParamArraySize < MAX_FOLEY_TYPES);
-	FoleyParams* aFoleyParams = &gFoleyParamArray[(int)theFoleyType];
+	FoleyParams* aFoleyParams = &gFoleyParamArray[static_cast<int>(theFoleyType)];
 	TOD_ASSERT(aFoleyParams->mFoleyType == theFoleyType);
 	return aFoleyParams;
 }
 
 FoleyInstance* SoundSystemFindInstance(TodFoley* theSoundSystem, FoleyType theFoleyType)
 {
-	FoleyTypeData* aFoleyData = &theSoundSystem->mFoleyTypeData[(int)theFoleyType];
+	FoleyTypeData* aFoleyData = &theSoundSystem->mFoleyTypeData[static_cast<int>(theFoleyType)];
 	for (int i = 0; i < MAX_FOLEY_INSTANCES; i++)
 	{
 		FoleyInstance* aFoleyInstance = &aFoleyData->mFoleyInstances[i];
@@ -219,7 +219,7 @@ FoleyInstance* SoundSystemFindInstance(TodFoley* theSoundSystem, FoleyType theFo
 
 FoleyInstance* SoundSystemGetFreeInstanceIndex(TodFoley* theSoundSystem, FoleyType theFoleyType)
 {
-	FoleyTypeData* aFoleyData = &theSoundSystem->mFoleyTypeData[(int)theFoleyType];
+	FoleyTypeData* aFoleyData = &theSoundSystem->mFoleyTypeData[static_cast<int>(theFoleyType)];
 	for (int i = 0; i < MAX_FOLEY_INSTANCES; i++)
 	{
 		FoleyInstance* aFoleyInstance = &aFoleyData->mFoleyInstances[i];
@@ -256,7 +256,7 @@ void TodFoley::PlayFoleyPitch(FoleyType theFoleyType, float thePitch)
 
 	int aVariations = 0;
 	intptr_t aVariationsArray[10];
-	FoleyTypeData* aFoleyData = &mFoleyTypeData[(int)theFoleyType];
+	FoleyTypeData* aFoleyData = &mFoleyTypeData[static_cast<int>(theFoleyType)];
 	for (int i = 0; i < 10; i++)
 	{
 		if (!TestBit(aFoleyParams->mFoleyFlags, FoleyFlags::FOLEYFLAGS_DONT_REPEAT) || aFoleyData->mLastVariationPlayed != i)  // 如果未重复或不禁止重复

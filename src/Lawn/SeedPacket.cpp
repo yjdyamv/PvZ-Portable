@@ -44,7 +44,7 @@ void SeedPacket::PickNextSlotMachineSeed()
 	};
 
 	int aSeedsCount = 0;
-	TodWeightedArray aSeedWeightArray[(int)SeedType::NUM_SEED_TYPES];
+	TodWeightedArray aSeedWeightArray[static_cast<int>(SeedType::NUM_SEED_TYPES)];
 	for (size_t i = 0; i < LENGTH(SLOT_SEED_TYPES); i++)
 	{
 		SeedType aSeedType = SLOT_SEED_TYPES[i];
@@ -67,12 +67,12 @@ void SeedPacket::PickNextSlotMachineSeed()
 			}
 		}
 
-		aSeedWeightArray[aSeedsCount].mItem = (int)aSeedType;
+		aSeedWeightArray[aSeedsCount].mItem = static_cast<int>(aSeedType);
 		aSeedWeightArray[aSeedsCount].mWeight = aWeight;
 		aSeedsCount++;
 	}
 
-	mSlotMachiningNextSeed = (SeedType)TodPickFromWeightedArray(aSeedWeightArray, aSeedsCount);
+	mSlotMachiningNextSeed = static_cast<SeedType>(TodPickFromWeightedArray(aSeedWeightArray, aSeedsCount));
 }
 
 void SeedPacket::SlotMachineStart()
@@ -590,7 +590,7 @@ void SeedPacket::Draw(Graphics* g)
 		}
 		else
 		{
-			aPercentDark = (float)(mRefreshTime - mRefreshCounter) / (float)mRefreshTime;
+			aPercentDark = static_cast<float>(mRefreshTime - mRefreshCounter) / static_cast<float>(mRefreshTime);
 		}
 	}
 
@@ -731,7 +731,7 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 		if (!mActive)
 		{
 			mApp->PlaySample(SOUND_BUZZER);
-			if (mApp->IsFirstTimeAdventureMode() && mBoard->mLevel == 1 && mBoard->mHelpDisplayed[(int)AdviceType::ADVICE_CLICK_ON_SUN])
+			if (mApp->IsFirstTimeAdventureMode() && mBoard->mLevel == 1 && mBoard->mHelpDisplayed[static_cast<int>(AdviceType::ADVICE_CLICK_ON_SUN)])
 			{
 				mBoard->DisplayAdvice("[ADVICE_SEED_REFRESH]", MessageStyle::MESSAGE_STYLE_TUTORIAL_LEVEL1, AdviceType::ADVICE_SEED_REFRESH);
 			}
@@ -743,7 +743,7 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 		{
 			mApp->PlaySample(SOUND_BUZZER);
 			mBoard->mOutOfMoneyCounter = 70;
-			if (mApp->IsFirstTimeAdventureMode() && mBoard->mLevel == 1 && mBoard->mHelpDisplayed[(int)AdviceType::ADVICE_CLICK_ON_SUN])
+			if (mApp->IsFirstTimeAdventureMode() && mBoard->mLevel == 1 && mBoard->mHelpDisplayed[static_cast<int>(AdviceType::ADVICE_CLICK_ON_SUN)])
 			{
 				mBoard->DisplayAdvice("[ADVICE_CANT_AFFORD_PLANT]", MessageStyle::MESSAGE_STYLE_TUTORIAL_LEVEL1, AdviceType::ADVICE_CANT_AFFORD_PLANT);
 			}

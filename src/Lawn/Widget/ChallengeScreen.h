@@ -5,7 +5,7 @@
 #include "widget/Dialog.h"
 using namespace Sexy;
 
-#define NUM_CHALLENGE_MODES ((int)GameMode::NUM_GAME_MODES - 1)
+#define NUM_CHALLENGE_MODES (static_cast<int>(GameMode::NUM_GAME_MODES) - 1)
 
 class LawnApp;
 class ToolTipWidget;

@@ -11,7 +11,7 @@ TodParticleDefinition* gParticleDefArray;   // [0x6A9F0C]
 int gParticleParamArraySize;				// [0x6A9F10]
 ParticleParams* gParticleParamArray;		// [0x6A9F14]
 
-ParticleParams gLawnParticleArray[(int)ParticleEffect::NUM_PARTICLES] = {
+ParticleParams gLawnParticleArray[static_cast<int>(ParticleEffect::NUM_PARTICLES)] = {
 	{ ParticleEffect::PARTICLE_MELONSPLASH, "particles/MelonImpact.xml" },
 	{ ParticleEffect::PARTICLE_WINTERMELON, "particles/WinterMelonImpact.xml" },
 	{ ParticleEffect::PARTICLE_FUMECLOUD, "particles/FumeCloud.xml" },
@@ -174,7 +174,7 @@ bool TodParticleLoadADef(TodParticleDefinition* theParticleDef, const char* theP
 			FloatTrackSetDefault(aDef.mClipRight, 0.0f);
 			FloatTrackSetDefault(aDef.mAnimationRate, 0.0f);
 			if (aDef.mImage)
-				((MemoryImage*)aDef.mImage)->mD3DFlags |= D3DImageFlags::D3DImageFlag_MinimizeNumSubdivisions;
+				reinterpret_cast<MemoryImage*>(aDef.mImage)->mD3DFlags |= D3DImageFlags::D3DImageFlag_MinimizeNumSubdivisions;
 		}
 		return true;
 	}
@@ -249,14 +249,14 @@ void TodParticleSystem::TodParticleInitializeFromDef(float theX, float theY, int
 		TodEmitterDefinition& aDef = theDefinition->mEmitterDefs[i];
 		if (!FloatTrackIsSet(aDef.mCrossFadeDuration))
 		{
-			if (TestBit(aDef.mParticleFlags, (int)ParticleFlags::PARTICLE_DIE_IF_OVERLOADED) && mParticleHolder->IsOverLoaded())
+			if (TestBit(aDef.mParticleFlags, static_cast<int>(ParticleFlags::PARTICLE_DIE_IF_OVERLOADED)) && mParticleHolder->IsOverLoaded())
 			{
 				ParticleSystemDie();
 				break;
 			}
 			TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayAlloc();
 			aEmitter->TodEmitterInitialize(theX, theY, this, &aDef);
-			mEmitterList.AddTail((ParticleEmitterID)mParticleHolder->mEmitters.DataArrayGetID(aEmitter));
+			mEmitterList.AddTail(static_cast<ParticleEmitterID>(mParticleHolder->mEmitters.DataArrayGetID(aEmitter)));
 		}
 	}
 }
@@ -304,7 +304,7 @@ void TodParticleSystem::ParticleSystemDie()
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
 	{
-		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue);
+		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		aEmitter->DeleteAll();
 		mParticleHolder->mEmitters.DataArrayFree(aEmitter);
 	}
@@ -329,7 +329,7 @@ TodParticle* TodParticleEmitter::SpawnParticle(int theIndex, int theSpawnCount)
 		aParticle->mParticleFieldInterp[i][0] = Sexy::Rand(1.0f);  // 初始化每个粒子场的横向插值
 		aParticle->mParticleFieldInterp[i][1] = Sexy::Rand(1.0f);  // 初始化每个粒子场的纵向插值
 	}
-	for (int i = 0; i < (int)ParticleTracks::NUM_PARTICLE_TRACKS; i++)
+	for (int i = 0; i < static_cast<int>(ParticleTracks::NUM_PARTICLE_TRACKS); i++)
 		aParticle->mParticleInterp[i] = Sexy::Rand(1.0f);  // 初始化每条通道的插值
 
 	float aParticleDurationInterp = Sexy::Rand(1.0f);
@@ -342,7 +342,7 @@ TodParticle* TodParticleEmitter::SpawnParticle(int theIndex, int theSpawnCount)
 	aParticle->mParticleEmitter = this;
 	aParticle->mParticleTimeValue = -1.0f;
 	aParticle->mParticleLastTimeValue = -1.0f;
-	if (TestBit(mEmitterDef->mParticleFlags, (int)ParticleFlags::PARTICLE_RANDOM_START_TIME))
+	if (TestBit(mEmitterDef->mParticleFlags, static_cast<int>(ParticleFlags::PARTICLE_RANDOM_START_TIME)))
 		aParticle->mParticleAge = Sexy::Rand(aParticle->mParticleDuration);  // 对于“随机初始时间”的粒子
 	float aLaunchSpeed = FloatTrackEvaluate(mEmitterDef->mLaunchSpeed, mSystemTimeValue, aLaunchSpeedInterp) * 0.01f;
 	float aLaunchAngleInterp = Sexy::Rand(1.0f);
@@ -359,7 +359,7 @@ TodParticle* TodParticleEmitter::SpawnParticle(int theIndex, int theSpawnCount)
 		aLaunchAngle = 2 * PI * theIndex / theSpawnCount + DEG_TO_RAD(FloatTrackEvaluate(mEmitterDef->mLaunchAngle, mSystemTimeValue, aLaunchAngleInterp));
 	else if (FloatTrackIsConstantZero(mEmitterDef->mLaunchAngle))
 		// 未定义的轨道，发射角度直接取 [0, 2π] 的随机值
-		aLaunchAngle = Sexy::Rand((float)(2 * PI));
+		aLaunchAngle = Sexy::Rand(static_cast<float>(2 * PI));
 	else
 		// 其他情况下，根据发射角度的定义值计算
 		aLaunchAngle = DEG_TO_RAD(FloatTrackEvaluate(mEmitterDef->mLaunchAngle, mSystemTimeValue, aLaunchAngleInterp));
@@ -441,9 +441,9 @@ TodParticle* TodParticleEmitter::SpawnParticle(int theIndex, int theSpawnCount)
 	else
 		aParticle->mImageFrame = Sexy::Rand(mEmitterDef->mImageFrames);  // 对于帧固定的粒子，在贴图的所有帧中随机取得一帧，后续一般不再变化
 
-	if (TestBit(mEmitterDef->mParticleFlags, (int)ParticleFlags::PARTICLE_RANDOM_LAUNCH_SPIN))
-		aParticle->mSpinPosition = Sexy::Rand((float)(2 * PI));  // 在 [0, 2π] 之间随机取得一个初始旋转角度
-	else if (TestBit(mEmitterDef->mParticleFlags, (int)ParticleFlags::PARTICLE_ALIGN_LAUNCH_SPIN))
+	if (TestBit(mEmitterDef->mParticleFlags, static_cast<int>(ParticleFlags::PARTICLE_RANDOM_LAUNCH_SPIN)))
+		aParticle->mSpinPosition = Sexy::Rand(static_cast<float>(2 * PI));  // 在 [0, 2π] 之间随机取得一个初始旋转角度
+	else if (TestBit(mEmitterDef->mParticleFlags, static_cast<int>(ParticleFlags::PARTICLE_ALIGN_LAUNCH_SPIN)))
 		aParticle->mSpinPosition = aLaunchAngle;  // 粒子旋转角度对齐发射角度
 	else
 		aParticle->mSpinPosition = 0.0f;  // 默认无初始旋转
@@ -451,7 +451,7 @@ TodParticle* TodParticleEmitter::SpawnParticle(int theIndex, int theSpawnCount)
 	aParticle->mCrossFadeDuration = 0;
 	aParticle->mCrossFadeParticleID = ParticleID::PARTICLEID_NULL;
 
-	ParticleID aParticleID = (ParticleID)aDataArray.DataArrayGetID(aParticle);
+	ParticleID aParticleID = static_cast<ParticleID>(aDataArray.DataArrayGetID(aParticle));
 	mParticleList.AddHead(aParticleID);
 	mParticlesSpawned++;
 	UpdateParticle(aParticle);
@@ -460,7 +460,7 @@ TodParticle* TodParticleEmitter::SpawnParticle(int theIndex, int theSpawnCount)
 
 float TodParticleEmitter::ParticleTrackEvaluate(FloatParameterTrack& theTrack, TodParticle* theParticle, ParticleTracks theParticleTrack)
 {
-	return FloatTrackEvaluate(theTrack, theParticle->mParticleTimeValue, theParticle->mParticleInterp[(int)theParticleTrack]);
+	return FloatTrackEvaluate(theTrack, theParticle->mParticleTimeValue, theParticle->mParticleInterp[static_cast<int>(theParticleTrack)]);
 }
 
 //0x516820
@@ -532,13 +532,13 @@ void TodParticleEmitter::UpdateParticleField(TodParticle* theParticle, ParticleF
 		int aLastRandSeed = theParticle->mParticleAge - 1;
 		if (aLastRandSeed == -1)
 			aLastRandSeed = theParticle->mParticleDuration - 1;
-		srand(aLastRandSeed * (uintptr_t)theParticle);
-		theParticle->mPosition.x -= aLastX * ((float)rand() / RAND_MAX * 2.0f - 1.0f);
-		theParticle->mPosition.y -= aLastY * ((float)rand() / RAND_MAX * 2.0f - 1.0f);
+		srand(aLastRandSeed * reinterpret_cast<uintptr_t>(theParticle));
+		theParticle->mPosition.x -= aLastX * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
+		theParticle->mPosition.y -= aLastY * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
 		// 再随机取得当前帧的震动效果
-		srand(theParticle->mParticleAge * (uintptr_t)theParticle);
-		theParticle->mPosition.x += x * ((float)rand() / RAND_MAX * 2.0f - 1.0f);
-		theParticle->mPosition.y += y * ((float)rand() / RAND_MAX * 2.0f - 1.0f);
+		srand(theParticle->mParticleAge * reinterpret_cast<uintptr_t>(theParticle));
+		theParticle->mPosition.x += x * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
+		theParticle->mPosition.y += y * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
 		break;
 	}
 	case ParticleFieldType::FIELD_CIRCLE:  // 圆周
@@ -567,7 +567,7 @@ void TodParticleEmitter::UpdateParticleField(TodParticle* theParticle, ParticleF
 
 float TodParticleEmitter::SystemTrackEvaluate(FloatParameterTrack& theTrack, ParticleSystemTracks theSystemTrack)
 {
-	return FloatTrackEvaluate(theTrack, mSystemTimeValue, mTrackInterp[(int)theSystemTrack]);
+	return FloatTrackEvaluate(theTrack, mSystemTimeValue, mTrackInterp[static_cast<int>(theSystemTrack)]);
 }
 
 //0x516D70
@@ -612,7 +612,7 @@ bool TodParticleEmitter::CrossFadeParticleToName(TodParticle* theParticle, const
 
 	TodParticleEmitter* aEmitter = mParticleSystem->mParticleHolder->mEmitters.DataArrayAlloc();
 	aEmitter->TodEmitterInitialize(mSystemCenter.x, mSystemCenter.y, mParticleSystem, aDef);
-	ParticleEmitterID aEmitterID = (ParticleEmitterID)mParticleSystem->mParticleHolder->mEmitters.DataArrayGetID(aEmitter);
+	ParticleEmitterID aEmitterID = static_cast<ParticleEmitterID>(mParticleSystem->mParticleHolder->mEmitters.DataArrayGetID(aEmitter));
 	mParticleSystem->mEmitterList.AddTail(aEmitterID);
 	return CrossFadeParticle(theParticle, aEmitter);
 }
@@ -622,7 +622,7 @@ bool TodParticleEmitter::UpdateParticle(TodParticle* theParticle)
 {
 	if (theParticle->mParticleAge >= theParticle->mParticleDuration)  // 粒子的生命周期结束时
 	{
-		if (TestBit(mEmitterDef->mParticleFlags, (int)ParticleFlags::PARTICLE_PARTICLE_LOOPS))  // 判断粒子是否循环
+		if (TestBit(mEmitterDef->mParticleFlags, static_cast<int>(ParticleFlags::PARTICLE_PARTICLE_LOOPS)))  // 判断粒子是否循环
 			theParticle->mParticleAge = 0;  // 重置粒子当前帧
 		else if (theParticle->mCrossFadeDuration > 0)  // 判断粒子是否处于交叉混合过程中
 			theParticle->mParticleAge = theParticle->mParticleDuration - 1;  // 将粒子滞留在最后一帧
@@ -633,7 +633,7 @@ bool TodParticleEmitter::UpdateParticle(TodParticle* theParticle)
 		mParticleSystem->mParticleHolder->mParticles.DataArrayTryToGet(theParticle->mCrossFadeParticleID) == nullptr)
 		return false;  // 当粒子不存在交叉混合时，可以删除粒子
 
-	theParticle->mParticleTimeValue = theParticle->mParticleAge / ((float)theParticle->mParticleDuration - 1);
+	theParticle->mParticleTimeValue = theParticle->mParticleAge / (static_cast<float>(theParticle->mParticleDuration) - 1);
 	for (int i = 0; i < mEmitterDef->mParticleFields.count; i++)  // 更新粒子受到每个粒子场的作用
 		UpdateParticleField(theParticle, &mEmitterDef->mParticleFields.Fields[i], theParticle->mParticleTimeValue, i);
 	theParticle->mPosition += theParticle->mVelocity;
@@ -661,16 +661,16 @@ bool TodParticleEmitter::UpdateParticle(TodParticle* theParticle)
 //0x517160
 void TodParticleEmitter::UpdateSpawning()
 {
-	TodParticleEmitter* aCrossFadeEmitter = mParticleSystem->mParticleHolder->mEmitters.DataArrayTryToGet((unsigned int)mCrossFadeEmitterID);
+	TodParticleEmitter* aCrossFadeEmitter = mParticleSystem->mParticleHolder->mEmitters.DataArrayTryToGet(static_cast<unsigned int>(mCrossFadeEmitterID));
 	TodParticleEmitter* aSpawningEmitter = !aCrossFadeEmitter ? this : aCrossFadeEmitter;  // 各项数据的计算均以此“主发射器”为准
 	mSpawnAccum += aSpawningEmitter->SystemTrackEvaluate(aSpawningEmitter->mEmitterDef->mSpawnRate, ParticleSystemTracks::TRACK_SPAWN_RATE) * 0.01;
-	int aSpawnCount = (int)mSpawnAccum;
+	int aSpawnCount = static_cast<int>(mSpawnAccum);
 	mSpawnAccum -= aSpawnCount;
 
-	int aSpawnMinActive = (int)aSpawningEmitter->SystemTrackEvaluate(aSpawningEmitter->mEmitterDef->mSpawnMinActive, ParticleSystemTracks::TRACK_SPAWN_MIN_ACTIVE);
+	int aSpawnMinActive = static_cast<int>(aSpawningEmitter->SystemTrackEvaluate(aSpawningEmitter->mEmitterDef->mSpawnMinActive, ParticleSystemTracks::TRACK_SPAWN_MIN_ACTIVE));
 	if (aSpawnMinActive >= 0 && aSpawnCount < aSpawnMinActive - mParticleList.mSize)
 		aSpawnCount = aSpawnMinActive - mParticleList.mSize;  // 至少确保将粒子数量增加至 aSpawnMinActive 个
-	int aSpawnMaxActive = (int)aSpawningEmitter->SystemTrackEvaluate(aSpawningEmitter->mEmitterDef->mSpawnMaxActive, ParticleSystemTracks::TRACK_SPAWN_MAX_ACTIVE);
+	int aSpawnMaxActive = static_cast<int>(aSpawningEmitter->SystemTrackEvaluate(aSpawningEmitter->mEmitterDef->mSpawnMaxActive, ParticleSystemTracks::TRACK_SPAWN_MAX_ACTIVE));
 	if (aSpawnMaxActive >= 0 && aSpawnCount > aSpawnMaxActive - mParticleList.mSize)
 		aSpawnCount = aSpawnMaxActive - mParticleList.mSize;  // 至多保证粒子数量不会超过 aSpawnMaxActive 个
 	if (FloatTrackIsSet(aSpawningEmitter->mEmitterDef->mSpawnMaxLaunched))
@@ -693,7 +693,7 @@ void TodParticleEmitter::DeleteNonCrossFading()
 {
 	for (TodListNode<ParticleID>* aNode = mParticleList.mHead; aNode != nullptr; aNode = aNode->mNext)
 	{
-		TodParticle* aParticle = mParticleSystem->mParticleHolder->mParticles.DataArrayGet((unsigned int)aNode->mValue);
+		TodParticle* aParticle = mParticleSystem->mParticleHolder->mParticles.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		if (aParticle->mCrossFadeDuration <= 0)  // 当粒子不处于交叉混合状态，则删除该粒子
 			DeleteParticle(aParticle);
 	}
@@ -719,7 +719,7 @@ void TodParticleSystem::Update()
 		bool aEmitterAlive = false;
 		for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
 		{
-			TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue);
+			TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 			aEmitter->Update();
 			if ((FloatTrackIsSet(aEmitter->mEmitterDef->mCrossFadeDuration) && aEmitter->mParticleList.mSize > 0) || !aEmitter->mDead)
 				aEmitterAlive = true;
@@ -757,21 +757,21 @@ bool TodParticleEmitter::CrossFadeParticle(TodParticle* theParticle, TodParticle
 	}
 	if (!FloatTrackIsSet(theToEmitter->mEmitterDef->mParticleDuration))  // 如果目标发射器未定义粒子持续时间
 		aToParticle->mParticleDuration = theParticle->mCrossFadeDuration;  // 目标粒子的持续时间等于交叉混合的时间
-	aToParticle->mCrossFadeParticleID = (ParticleID)mParticleSystem->mParticleHolder->mParticles.DataArrayGetID(theParticle);  // 赋值交叉混合来源的粒子编号
+	aToParticle->mCrossFadeParticleID = static_cast<ParticleID>(mParticleSystem->mParticleHolder->mParticles.DataArrayGetID(theParticle));  // 赋值交叉混合来源的粒子编号
 	return true;
 }
 
 //0x517490
 void TodParticleEmitter::DeleteParticle(TodParticle* theParticle)
 {
-	TodParticle* aCrossFadeParticle = mParticleSystem->mParticleHolder->mParticles.DataArrayTryToGet((unsigned int)theParticle->mCrossFadeParticleID);
+	TodParticle* aCrossFadeParticle = mParticleSystem->mParticleHolder->mParticles.DataArrayTryToGet(static_cast<unsigned int>(theParticle->mCrossFadeParticleID));
 	if (aCrossFadeParticle != nullptr)
 	{
 		aCrossFadeParticle->mParticleEmitter->DeleteParticle(aCrossFadeParticle);  // 同时删除交叉混合的源粒子
 		theParticle->mCrossFadeParticleID = ParticleID::PARTICLEID_NULL;
 	}
 	
-	ParticleID aParticleID = (ParticleID)mParticleSystem->mParticleHolder->mParticles.DataArrayGetID(theParticle);
+	ParticleID aParticleID = static_cast<ParticleID>(mParticleSystem->mParticleHolder->mParticles.DataArrayGetID(theParticle));
 	mParticleList.RemoveAt(mParticleList.Find(aParticleID));
 	mParticleSystem->mParticleHolder->mParticles.DataArrayFree(theParticle);
 }
@@ -786,7 +786,7 @@ void TodParticleEmitter::Update()
 	bool aDie = false;
 	if (mSystemAge >= mSystemDuration)  // 发射器的生命周期结束时
 	{
-		if (TestBit(mEmitterDef->mParticleFlags, (unsigned int)ParticleFlags::PARTICLE_SYSTEM_LOOPS))  // 判断发射器是否循环
+		if (TestBit(mEmitterDef->mParticleFlags, static_cast<int>(ParticleFlags::PARTICLE_SYSTEM_LOOPS)))  // 判断发射器是否循环
 			mSystemAge = 0;  // 重置发射器当前帧
 		else
 		{
@@ -808,12 +808,12 @@ void TodParticleEmitter::Update()
 			aDie = true;
 	}
 
-	mSystemTimeValue = mSystemAge / (float)(mSystemDuration - 1);
+	mSystemTimeValue = mSystemAge / static_cast<float>(mSystemDuration - 1);
 	for (int i = 0; i < mEmitterDef->mSystemFields.count; i++)
 		UpdateSystemField(&mEmitterDef->mSystemFields.Fields[i], mSystemTimeValue, i);  // 更新发射器受到每个系统场的作用
 	for (TodListNode<ParticleID>* aNode = mParticleList.mHead; aNode != nullptr; aNode = aNode->mNext)
 	{
-		TodParticle* aParticle = mParticleSystem->mParticleHolder->mParticles.DataArrayGet((unsigned int)aNode->mValue);
+		TodParticle* aParticle = mParticleSystem->mParticleHolder->mParticles.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		if (!UpdateParticle(aParticle))  // 更新发射器中的每个粒子
 			DeleteParticle(aParticle);
 	}
@@ -873,8 +873,8 @@ bool TodParticleEmitter::GetRenderParams(TodParticle* theParticle, ParticleRende
 	theParams->mSpinPositionIsSet = false;
 	theParams->mSpinPositionIsSet |= FloatTrackIsSet(aDef->mParticleSpinSpeed);
 	theParams->mSpinPositionIsSet |= FloatTrackIsSet(aDef->mParticleSpinAngle);
-	theParams->mSpinPositionIsSet |= TestBit(aDef->mParticleFlags, (int)ParticleFlags::PARTICLE_RANDOM_LAUNCH_SPIN);
-	theParams->mSpinPositionIsSet |= TestBit(aDef->mParticleFlags, (int)ParticleFlags::PARTICLE_ALIGN_LAUNCH_SPIN);
+	theParams->mSpinPositionIsSet |= TestBit(aDef->mParticleFlags, static_cast<int>(ParticleFlags::PARTICLE_RANDOM_LAUNCH_SPIN));
+	theParams->mSpinPositionIsSet |= TestBit(aDef->mParticleFlags, static_cast<int>(ParticleFlags::PARTICLE_ALIGN_LAUNCH_SPIN));
 	// 位置
 	theParams->mPositionIsSet = false;
 	theParams->mPositionIsSet |= (aDef->mParticleFields.count > 0.0f);
@@ -907,13 +907,13 @@ bool TodParticleEmitter::GetRenderParams(TodParticle* theParticle, ParticleRende
 	theParams->mParticleScale = aParticleScale * aEmitter->mScaleOverride;
 	theParams->mSpinPosition = theParticle->mSpinPosition;
 
-	TodParticle* aCrossFadeParticle = aEmitter->mParticleSystem->mParticleHolder->mParticles.DataArrayTryToGet((unsigned int)theParticle->mCrossFadeParticleID);
+	TodParticle* aCrossFadeParticle = aEmitter->mParticleSystem->mParticleHolder->mParticles.DataArrayTryToGet(static_cast<unsigned int>(theParticle->mCrossFadeParticleID));
 	if (aCrossFadeParticle != nullptr)  // 当存在交叉混合的粒子时，将二者的渲染参数进行混合（从 aCrossFadeParticle 至 theParticle 的交叉混合）
 	{
 		ParticleRenderParams aCrossFadeParams;
 		if (TodParticleEmitter::GetRenderParams(aCrossFadeParticle, &aCrossFadeParams))
 		{
-			float aFraction = theParticle->mParticleAge / (float)(aCrossFadeParticle->mCrossFadeDuration - 1);
+			float aFraction = theParticle->mParticleAge / static_cast<float>(aCrossFadeParticle->mCrossFadeDuration - 1);
 			// 各项数值按照 aFraction 比例混合
 			theParams->mRed = CrossFadeLerp(aCrossFadeParams.mRed, theParams->mRed, aCrossFadeParams.mRedIsSet, theParams->mRedIsSet, aFraction);
 			theParams->mGreen = CrossFadeLerp(aCrossFadeParams.mGreen, theParams->mGreen, aCrossFadeParams.mGreenIsSet, theParams->mGreenIsSet, aFraction);
@@ -986,15 +986,15 @@ void RenderParticle(Graphics* g, TodParticle* theParticle, const Color& theColor
 	TOD_ASSERT(aSrcRect.mX >= 0 && aSrcRect.mX < 10000);
 	TOD_ASSERT(aSrcRect.mY >= 0 && aSrcRect.mY < 10000);
 
-	if (TestBit(aEmitterDef->mParticleFlags, (int)ParticleFlags::PARTICLE_ALIGN_TO_PIXELS))  // 坐标对齐至整数像素点
+	if (TestBit(aEmitterDef->mParticleFlags, static_cast<int>(ParticleFlags::PARTICLE_ALIGN_TO_PIXELS)))  // 坐标对齐至整数像素点
 	{
 		theParams->mPosX = FloatRoundToInt(theParams->mPosX);
 		theParams->mPosY = FloatRoundToInt(theParams->mPosY);
 	}
 	int aDrawMode = g->mDrawMode;
-	if (TestBit(aEmitterDef->mParticleFlags, (int)ParticleFlags::PARTICLE_ADDITIVE))  // 使用叠加模式
+	if (TestBit(aEmitterDef->mParticleFlags, static_cast<int>(ParticleFlags::PARTICLE_ADDITIVE)))  // 使用叠加模式
 		aDrawMode = Graphics::DRAWMODE_ADDITIVE;
-	if (TestBit(aEmitterDef->mParticleFlags, (int)ParticleFlags::PARTICLE_FULLSCREEN))  // 全屏模式
+	if (TestBit(aEmitterDef->mParticleFlags, static_cast<int>(ParticleFlags::PARTICLE_FULLSCREEN)))  // 全屏模式
 	{
 		theTriangleGroup->DrawGroup(g);
 		Color anOldColor = g->GetColor();
@@ -1045,7 +1045,7 @@ void TodParticleEmitter::DrawParticle(Graphics* g, TodParticle* theParticle, Tod
 			if (mImageOverride || mEmitterDef->mImage)  // 粒子有贴图时，渲染该粒子
 				aParticle = theParticle;
 			else  // 粒子没有贴图时，尝试渲染交叉混合来源的粒子
-				aParticle = mParticleSystem->mParticleHolder->mParticles.DataArrayTryToGet((unsigned int)theParticle->mCrossFadeParticleID);
+				aParticle = mParticleSystem->mParticleHolder->mParticles.DataArrayTryToGet(static_cast<unsigned int>(theParticle->mCrossFadeParticleID));
 			if (aParticle != nullptr)
 				RenderParticle(g, aParticle, aColor, &aParams, theTriangleGroup);
 		}
@@ -1056,20 +1056,20 @@ void TodParticleEmitter::DrawParticle(Graphics* g, TodParticle* theParticle, Tod
 void TodParticleSystem::Draw(Graphics* g)
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
-		mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue)->Draw(g);
+		mParticleHolder->mEmitters.DataArrayGet(static_cast<unsigned int>(aNode->mValue))->Draw(g);
 }
 
 //0x5183A0
 void TodParticleEmitter::Draw(Graphics* g)
 {
 	bool aHardWare = gSexyAppBase->Is3DAccelerated();
-	if ((TestBit(mEmitterDef->mParticleFlags, (int)ParticleFlags::PARTICLE_SOFTWARE_ONLY) && aHardWare) ||
-		(TestBit(mEmitterDef->mParticleFlags, (int)ParticleFlags::PARTICLE_HARDWARE_ONLY) && !aHardWare))
+	if ((TestBit(mEmitterDef->mParticleFlags, static_cast<int>(ParticleFlags::PARTICLE_SOFTWARE_ONLY)) && aHardWare) ||
+		(TestBit(mEmitterDef->mParticleFlags, static_cast<int>(ParticleFlags::PARTICLE_HARDWARE_ONLY)) && !aHardWare))
 		return;
 
 	TodTriangleGroup aTriangleGroup;
 	for (TodListNode<ParticleID>* aNode = mParticleList.mHead; aNode != nullptr; aNode = aNode->mNext)
-		DrawParticle(g, mParticleSystem->mParticleHolder->mParticles.DataArrayGet((unsigned int)aNode->mValue), &aTriangleGroup);
+		DrawParticle(g, mParticleSystem->mParticleHolder->mParticles.DataArrayGet(static_cast<unsigned int>(aNode->mValue)), &aTriangleGroup);
 	aTriangleGroup.DrawGroup(g);
 }
 
@@ -1077,7 +1077,7 @@ void TodParticleEmitter::Draw(Graphics* g)
 void TodParticleSystem::SystemMove(float theX, float theY)
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
-		mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue)->SystemMove(theX, theY);
+		mParticleHolder->mEmitters.DataArrayGet(static_cast<unsigned int>(aNode->mValue))->SystemMove(theX, theY);
 }
 
 //0x518480
@@ -1090,11 +1090,11 @@ void TodParticleEmitter::SystemMove(float theX, float theY)
 	
 	mSystemCenter.x = theX;
 	mSystemCenter.y = theY;
-	if (!TestBit(mEmitterDef->mParticleFlags, (int)ParticleFlags::PARTICLE_PARTICLES_DONT_FOLLOW))
+	if (!TestBit(mEmitterDef->mParticleFlags, static_cast<int>(ParticleFlags::PARTICLE_PARTICLES_DONT_FOLLOW)))
 	{
 		for (TodListNode<ParticleID>* aNode = mParticleList.mHead; aNode != nullptr; aNode = aNode->mNext)
 		{
-			TodParticle* aParticle = mParticleSystem->mParticleHolder->mParticles.DataArrayGet((unsigned int)aNode->mValue);
+			TodParticle* aParticle = mParticleSystem->mParticleHolder->mParticles.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 			aParticle->mPosition.x += aDeltaX;
 			aParticle->mPosition.y += aDeltaY;
 		}
@@ -1106,7 +1106,7 @@ void TodParticleSystem::OverrideColor(const char* theEmitterName, const Color& t
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
 	{
-		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue);
+		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		if (theEmitterName == nullptr || strcasecmp(theEmitterName, aEmitter->mEmitterDef->mName) == 0)
 			aEmitter->mColorOverride = theColor;
 	}
@@ -1117,7 +1117,7 @@ void TodParticleSystem::OverrideExtraAdditiveDraw(const char* theEmitterName, bo
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
 	{
-		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue);
+		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		if (theEmitterName == nullptr || strcasecmp(theEmitterName, aEmitter->mEmitterDef->mName) == 0)
 			aEmitter->mExtraAdditiveDrawOverride = theEnableExtraAdditiveDraw;
 	}
@@ -1129,7 +1129,7 @@ void TodParticleSystem::OverrideImage(const char* theEmitterName, Image* theImag
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
 	{
-		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue);
+		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		if (theEmitterName == nullptr || strcasecmp(theEmitterName, aEmitter->mEmitterDef->mName) == 0)
 			aEmitter->mImageOverride = theImage;
 	}
@@ -1139,7 +1139,7 @@ void TodParticleSystem::OverrideFrame(const char* theEmitterName, int theFrame)
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
 	{
-		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue);
+		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		if (theEmitterName == nullptr || strcasecmp(theEmitterName, aEmitter->mEmitterDef->mName) == 0)
 			aEmitter->mFrameOverride = theFrame;
 	}
@@ -1150,7 +1150,7 @@ void TodParticleSystem::OverrideScale(const char* theEmitterName, float theScale
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
 	{
-		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue);
+		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		if (theEmitterName == nullptr || strcasecmp(theEmitterName, aEmitter->mEmitterDef->mName) == 0)
 			aEmitter->mScaleOverride = theScale;
 	}
@@ -1160,7 +1160,7 @@ TodParticleEmitter* TodParticleSystem::FindEmitterByName(const char* theEmitterN
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
 	{
-		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue);
+		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		if (strcasecmp(theEmitterName, aEmitter->mEmitterDef->mName) == 0)
 			return aEmitter;
 	}
@@ -1197,12 +1197,12 @@ void TodParticleEmitter::CrossFadeEmitter(TodParticleEmitter* theToEmitter)
 	float aCrossFadeDurationInterp = Sexy::Rand(1.0f);
 	mEmitterCrossFadeCountDown = FloatTrackEvaluate(theToEmitter->mEmitterDef->mCrossFadeDuration, mSystemTimeValue, aCrossFadeDurationInterp);
 	mEmitterCrossFadeCountDown = std::max(1, mEmitterCrossFadeCountDown);
-	mCrossFadeEmitterID = (ParticleEmitterID)mParticleSystem->mParticleHolder->mEmitters.DataArrayGetID(theToEmitter);
+	mCrossFadeEmitterID = static_cast<ParticleEmitterID>(mParticleSystem->mParticleHolder->mEmitters.DataArrayGetID(theToEmitter));
 	if (!FloatTrackIsSet(theToEmitter->mEmitterDef->mSystemDuration))
 		theToEmitter->mSystemDuration = mEmitterCrossFadeCountDown;
 
 	for (TodListNode<ParticleID>* aNode = mParticleList.mHead; aNode != nullptr; aNode = aNode->mNext)
-		CrossFadeParticle(mParticleSystem->mParticleHolder->mParticles.DataArrayGet((unsigned int)aNode->mValue), theToEmitter);
+		CrossFadeParticle(mParticleSystem->mParticleHolder->mParticles.DataArrayGet(static_cast<unsigned int>(aNode->mValue)), theToEmitter);
 }
 
 //0x518790
@@ -1228,12 +1228,12 @@ void TodParticleSystem::CrossFade(const char* theEmitterName)
 
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
 	{
-		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue);
+		TodParticleEmitter* aEmitter = mParticleHolder->mEmitters.DataArrayGet(static_cast<unsigned int>(aNode->mValue));
 		if (aEmitter->mEmitterDef != aEmitterDef)  // 不能交叉混合至同种类的发射器
 		{
 			TodParticleEmitter* aCrossFadeEmitter = mParticleHolder->mEmitters.DataArrayAlloc();
 			aCrossFadeEmitter->TodEmitterInitialize(aEmitter->mSystemCenter.x, aEmitter->mSystemCenter.y, this, aEmitterDef);
-			ParticleEmitterID aCrossFadeEmitterID = (ParticleEmitterID)mParticleHolder->mEmitters.DataArrayGetID(aCrossFadeEmitter);
+			ParticleEmitterID aCrossFadeEmitterID = static_cast<ParticleEmitterID>(mParticleHolder->mEmitters.DataArrayGetID(aCrossFadeEmitter));
 			mEmitterList.AddTail(aCrossFadeEmitterID);
 			aEmitter->CrossFadeEmitter(aCrossFadeEmitter);
 		}
@@ -1293,6 +1293,6 @@ TodParticleSystem* TodParticleHolder::AllocParticleSystemFromDef(float theX, flo
 //0x518A70
 TodParticleSystem* TodParticleHolder::AllocParticleSystem(float theX, float theY, int theRenderOrder, ParticleEffect theParticleEffect)
 {
-	TOD_ASSERT((int)theParticleEffect >= 0 && (int)theParticleEffect < gParticleDefCount);
-	return AllocParticleSystemFromDef(theX, theY, theRenderOrder, &gParticleDefArray[(int)theParticleEffect], theParticleEffect);
+	TOD_ASSERT(static_cast<int>(theParticleEffect) >= 0 && static_cast<int>(theParticleEffect) < gParticleDefCount);
+	return AllocParticleSystemFromDef(theX, theY, theRenderOrder, &gParticleDefArray[static_cast<int>(theParticleEffect)], theParticleEffect);
 }

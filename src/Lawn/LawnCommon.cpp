@@ -117,14 +117,14 @@ Checkbox* MakeNewCheckbox(int theId, CheckboxListener* theListener, bool theDefa
 
 std::string GetSavedGameName(GameMode theGameMode, int theProfileId)
 {
-    return GetAppDataPath(StrFormat("userdata/game%d_%d.v4", theProfileId, (int)theGameMode));
+    return GetAppDataPath(StrFormat("userdata/game%d_%d.v4", theProfileId, static_cast<int>(theGameMode)));
 }
 
 //0x4568D0
 // GOTY @Patoke: 0x45A200
 std::string GetLegacySavedGameName(GameMode theGameMode, int theProfileId)
 {
-    return GetAppDataPath(StrFormat("userdata/game%d_%d.dat", theProfileId, (int)theGameMode));
+    return GetAppDataPath(StrFormat("userdata/game%d_%d.dat", theProfileId, static_cast<int>(theGameMode)));
 }
 
 //0x456980

@@ -436,7 +436,7 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
         {
             aDistance /= 3;
         }
-        mPhaseCounter = (int)(aDistance / mVelX) * ZOMBIE_LIMP_SPEED_FACTOR;
+        mPhaseCounter = static_cast<int>(aDistance / mVelX) * ZOMBIE_LIMP_SPEED_FACTOR;
         mZombieAttackRect = Rect(20, 0, 50, 115);
 
         if (mApp->IsScaryPotterLevel())
@@ -729,7 +729,7 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
         mVariant = false;
         mBodyHealth = 500;
         int aDistance = 275 + Rand(175);
-        mPhaseCounter = (int)(aDistance / mVelX) * ZOMBIE_LIMP_SPEED_FACTOR;
+        mPhaseCounter = static_cast<int>(aDistance / mVelX) * ZOMBIE_LIMP_SPEED_FACTOR;
         break;
     }
 
@@ -823,8 +823,8 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
     mShieldMaxHealth = mShieldHealth;
     mFlyingMaxHealth = mFlyingHealth;
     mDead = false;
-    mX = (int)mPosX;
-    mY = (int)mPosY;
+    mX = static_cast<int>(mPosX);
+    mY = static_cast<int>(mPosY);
     mRenderOrder = Board::MakeRenderOrder(aRenderLayer, mRow, aRenderOffset);
     if (mZombieHeight == ZombieHeight::HEIGHT_ZOMBIQUARIUM)
     {
@@ -1196,7 +1196,7 @@ void Zombie::BungeeLiftTarget()
 {
     PlayZombieReanim("anim_raise", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 0, 36.0f);
     
-    Plant* aPlant = mBoard->mPlants.DataArrayTryToGet((unsigned int)mTargetPlantID);
+    Plant* aPlant = mBoard->mPlants.DataArrayTryToGet(static_cast<unsigned int>(mTargetPlantID));
     if (aPlant == nullptr)
         return;
 
@@ -1339,8 +1339,8 @@ void Zombie::UpdateZombieBungee()
         }
     }
 
-    mX = (int)mPosX;
-    mY = (int)mPosY;
+    mX = static_cast<int>(mPosX);
+    mY = static_cast<int>(mPosY);
 }
 
 //0x525350
@@ -1349,7 +1349,7 @@ void Zombie::PogoBreak(unsigned int theDamageFlags)
     if (!mHasObject)
         return;
 
-    if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_LEAVE_BODY))
+    if (!TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_LEAVE_BODY)))
     {
         //ZombieDrawPosition aDrawPos;
         //GetDrawPos(aDrawPos);
@@ -1460,7 +1460,7 @@ void Zombie::UpdateZombiePogo()
     if (mZombiePhase == ZombiePhase::PHASE_POGO_HIGH_BOUNCE_1)
     {
         mZombiePhase = ZombiePhase::PHASE_POGO_FORWARD_BOUNCE_2;
-        mVelX = (mX - aPlant->mX + 60) / (float)POGO_BOUNCE_TIME;  // 速度 = 跳跃距离 / 跳跃时间
+        mVelX = (mX - aPlant->mX + 60) / static_cast<float>(POGO_BOUNCE_TIME);  // 速度 = 跳跃距离 / 跳跃时间
         mPhaseCounter = POGO_BOUNCE_TIME;
     }
     else
@@ -1596,7 +1596,7 @@ void Zombie::UpdateZombieCatapult()
 //0x525B60
 void Zombie::LandFlyer(unsigned int theDamageFlags)
 {
-    if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_LEAVE_BODY) && mZombiePhase == ZombiePhase::PHASE_BALLOON_FLYING)
+    if (!TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_LEAVE_BODY)) && mZombiePhase == ZombiePhase::PHASE_BALLOON_FLYING)
     {
         mApp->PlaySample(SOUND_BALLOON_POP);
         mZombiePhase = ZombiePhase::PHASE_BALLOON_POPPING;
@@ -1736,7 +1736,7 @@ void Zombie::UpdateZombiePolevaulter()
 
         if (aJumpEnds)
         {
-            mX = (int)mPosX;
+            mX = static_cast<int>(mPosX);
             mZombiePhase = ZombiePhase::PHASE_POLEVAULTER_POST_VAULT;
             mZombieAttackRect = Rect(50, 0, 20, 115);
 
@@ -2785,8 +2785,8 @@ ZombieID Zombie::SummonBackupDancer(int theRow, int thePosX)
     aZombie->mPosX = thePosX;
     aZombie->mPosY = GetPosYBasedOnRow(theRow);
     aZombie->SetRow(theRow);
-    aZombie->mX = (int)aZombie->mPosX;
-    aZombie->mY = (int)aZombie->mPosY;
+    aZombie->mX = static_cast<int>(aZombie->mPosX);
+    aZombie->mY = static_cast<int>(aZombie->mPosY);
 
     aZombie->mAltitude = ZOMBIE_BACKUP_DANCER_RISE_HEIGHT;
     aZombie->mZombiePhase = ZombiePhase::PHASE_DANCER_RISING;
@@ -2796,8 +2796,8 @@ ZombieID Zombie::SummonBackupDancer(int theRow, int thePosX)
     aZombie->SetAnimRate(0.0f);
     aZombie->mMindControlled = mMindControlled;
 
-    int aParticleX = (int)aZombie->mPosX + 60;
-    int aParticleY = (int)aZombie->mPosY + 110;
+    int aParticleX = static_cast<int>(aZombie->mPosX) + 60;
+    int aParticleY = static_cast<int>(aZombie->mPosY) + 110;
     if (aZombie->IsOnHighGround())
     {
         aParticleY -= HIGH_GROUND_HEIGHT;
@@ -4312,8 +4312,8 @@ void Zombie::Update()
             }
         }
 
-        mX = (int)mPosX;
-        mY = (int)mPosY;
+        mX = static_cast<int>(mPosX);
+        mY = static_cast<int>(mPosY);
 
         AttachmentUpdateAndMove(mAttachmentID, mPosX, mPosY);
         UpdateReanim();
@@ -5505,7 +5505,7 @@ void Zombie::DrawBungeeReanim(Graphics* g)
     }
     else
     {
-        Plant* aPlant = mBoard->mPlants.DataArrayTryToGet((unsigned int)mTargetPlantID);
+        Plant* aPlant = mBoard->mPlants.DataArrayTryToGet(static_cast<unsigned int>(mTargetPlantID));
         if (aPlant)
         {
             Graphics aPlantGraphics(*g);
@@ -5547,8 +5547,8 @@ void Zombie::DrawBungeeTarget(Graphics* g)
     float aTargetY = mY + 60.0f + aDrawPos.mBodyY + aDrawPos.mImageOffsetY;
     if (mZombiePhase == ZombiePhase::PHASE_BUNGEE_DIVING || mZombiePhase == ZombiePhase::PHASE_BUNGEE_DIVING_SCREAMING)
     {
-        aTargetX += TodAnimateCurveFloat(BUNGEE_ZOMBIE_HEIGHT, BUNGEE_ZOMBIE_HEIGHT - 400, (int)mAltitude, 30.0f, 0.0f, TodCurves::CURVE_LINEAR);
-        aTargetY += TodAnimateCurveFloat(BUNGEE_ZOMBIE_HEIGHT, BUNGEE_ZOMBIE_HEIGHT - 400, (int)mAltitude, -600.0f, 0.0f, TodCurves::CURVE_LINEAR);
+        aTargetX += TodAnimateCurveFloat(BUNGEE_ZOMBIE_HEIGHT, BUNGEE_ZOMBIE_HEIGHT - 400, static_cast<int>(mAltitude), 30.0f, 0.0f, TodCurves::CURVE_LINEAR);
+        aTargetY += TodAnimateCurveFloat(BUNGEE_ZOMBIE_HEIGHT, BUNGEE_ZOMBIE_HEIGHT - 400, static_cast<int>(mAltitude), -600.0f, 0.0f, TodCurves::CURVE_LINEAR);
     }
 
     g->DrawImageF(IMAGE_BUNGEETARGET, aTargetX, aTargetY + mAltitude);
@@ -6672,8 +6672,8 @@ void Zombie::ConvertToNormalZombie()
 {
     StopZombieSound();
     mPosY = GetPosYBasedOnRow(mRow);
-    mX = (int)mPosX;
-    mY = (int)mPosY;
+    mX = static_cast<int>(mPosX);
+    mY = static_cast<int>(mPosY);
 
     mZombieType = ZombieType::ZOMBIE_NORMAL;
     mZombiePhase = ZombiePhase::PHASE_ZOMBIE_NORMAL;
@@ -7394,7 +7394,7 @@ void Zombie::BungeeDie()
 
     if (mBoard)  // 原版没有这个判断，因为 mBoard 为空时 DataArrayTryToGet() 不会实际用到 mBoard，此处为了确保安全就加上了这个判断
     {
-        Plant* aPlant = mBoard->mPlants.DataArrayTryToGet((unsigned int)mTargetPlantID);
+        Plant* aPlant = mBoard->mPlants.DataArrayTryToGet(static_cast<unsigned int>(mTargetPlantID));
         if (aPlant)
         {
             mBoard->mPlantsEaten++;
@@ -7543,7 +7543,7 @@ void Zombie::DropShield(unsigned int theDamageFlags)
     if (mShieldType == ShieldType::SHIELDTYPE_DOOR)
     {
         DetachShield();
-        if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_LEAVE_BODY))
+        if (!TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_LEAVE_BODY)))
         {
             float aPosX, aPosY;
             GetTrackPosition("anim_screendoor", aPosX, aPosY);
@@ -7565,7 +7565,7 @@ void Zombie::DropShield(unsigned int theDamageFlags)
         PlayZombieReanim("anim_gasp", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 10, 8.0f);
         DetachShield();
 
-        if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_LEAVE_BODY))
+        if (!TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_LEAVE_BODY)))
         {
             float aPosX, aPosY;
             GetTrackPosition("Zombie_paper_paper", aPosX, aPosY);
@@ -7573,7 +7573,7 @@ void Zombie::DropShield(unsigned int theDamageFlags)
             OverrideParticleScale(aParticle);
         }
 
-        if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_LEAVE_BODY) && !TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_BYPASSES_SHIELD))
+        if (!TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_LEAVE_BODY)) && !TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_BYPASSES_SHIELD)))
         {
             mApp->PlayFoley(FoleyType::FOLEY_NEWSPAPER_RIP);
             AddAttachedReanim(-11, 0, ReanimationType::REANIM_ZOMBIE_SURPRISE);
@@ -7582,7 +7582,7 @@ void Zombie::DropShield(unsigned int theDamageFlags)
     else if (mShieldType == ShieldType::SHIELDTYPE_LADDER)
     {
         DetachShield();
-        if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_LEAVE_BODY))
+        if (!TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_LEAVE_BODY)))
         {
             float aPosX = mPosX + 31.0f;
             float aPosY = mPosY + 80.0f;
@@ -7597,7 +7597,7 @@ void Zombie::DropShield(unsigned int theDamageFlags)
 //0x530BC0
 int Zombie::TakeShieldDamage(int theDamage, unsigned int theDamageFlags)
 {
-    if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH))
+    if (!TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH)))
     {
         mShieldJustGotShotCounter = 25;
         if (mJustGotShotCounter < 0)
@@ -7606,7 +7606,7 @@ int Zombie::TakeShieldDamage(int theDamage, unsigned int theDamageFlags)
         }
     }
 
-    if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH) && !TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_HITS_SHIELD_AND_BODY))
+    if (!TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH)) && !TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_HITS_SHIELD_AND_BODY)))
     {
         mShieldRecoilCounter = 12;
         if (mShieldType == ShieldType::SHIELDTYPE_DOOR || mShieldType == ShieldType::SHIELDTYPE_LADDER)
@@ -7702,12 +7702,12 @@ void Zombie::DropHelm(unsigned int theDamageFlags)
         ReanimShowTrack("Zombie_digger_hardhat", RENDER_GROUP_HIDDEN);
         aEffect = ParticleEffect::PARTICLE_ZOMBIE_HEADLIGHT;
     }
-    else if (mHelmType == HelmType::HELMTYPE_BOBSLED && !TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_LEAVE_BODY))
+    else if (mHelmType == HelmType::HELMTYPE_BOBSLED && !TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_LEAVE_BODY)))
     {
         BobsledCrash();
     }
 
-    if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_LEAVE_BODY) && aEffect != ParticleEffect::PARTICLE_NONE)
+    if (!TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_LEAVE_BODY)) && aEffect != ParticleEffect::PARTICLE_NONE)
     {
         TodParticleSystem* aParticle = mApp->AddTodParticle(aPosX, aPosY, mRenderOrder + 1, aEffect);
         OverrideParticleScale(aParticle);
@@ -7719,7 +7719,7 @@ void Zombie::DropHelm(unsigned int theDamageFlags)
 //0x530FE0
 int Zombie::TakeHelmDamage(int theDamage, unsigned int theDamageFlags)
 {
-    if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH))
+    if (!TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH)))
     {
         mJustGotShotCounter = 25;
     }
@@ -7728,7 +7728,7 @@ int Zombie::TakeHelmDamage(int theDamage, unsigned int theDamageFlags)
     int aDamageActual = std::min(mHelmHealth, theDamage);
     int aDamageRemaining = theDamage - aDamageActual;
     mHelmHealth -= aDamageActual;
-    if (TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_FREEZE))
+    if (TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_FREEZE)))
     {
         ApplyChill(false);
     }
@@ -7805,7 +7805,7 @@ int Zombie::TakeHelmDamage(int theDamage, unsigned int theDamageFlags)
 
 int Zombie::TakeFlyingDamage(int theDamage, unsigned int theDamageFlags)
 {
-    if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH))
+    if (!TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH)))
     {
         mJustGotShotCounter = 25;
     }
@@ -7824,12 +7824,12 @@ int Zombie::TakeFlyingDamage(int theDamage, unsigned int theDamageFlags)
 //0x5312D0
 void Zombie::TakeBodyDamage(int theDamage, unsigned int theDamageFlags)
 {
-    if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH))
+    if (!TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH)))
     {
         mJustGotShotCounter = 25;
     }
 
-    if (TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_FREEZE))
+    if (TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_FREEZE)))
     {
         ApplyChill(false);
     }
@@ -7841,12 +7841,12 @@ void Zombie::TakeBodyDamage(int theDamage, unsigned int theDamageFlags)
     if (mZombieType == ZombieType::ZOMBIE_ZAMBONI)
     {
         Reanimation* aBodyReanim = mApp->ReanimationGet(mBodyReanimID);
-        if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH))
+        if (!TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH)))
         {
             mApp->PlayFoley(FoleyType::FOLEY_SHIELD_HIT);
         }
 
-        if (TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_SPIKE))
+        if (TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_SPIKE)))
         {
             aBodyReanim->SetImageOverride("Zombie_zamboni_1", IMAGE_REANIM_ZOMBIE_ZAMBONI_1_DAMAGE2);
             aBodyReanim->SetImageOverride("Zombie_zamboni_2", IMAGE_REANIM_ZOMBIE_ZAMBONI_2_DAMAGE2);
@@ -7874,7 +7874,7 @@ void Zombie::TakeBodyDamage(int theDamage, unsigned int theDamageFlags)
     else if (mZombieType == ZombieType::ZOMBIE_CATAPULT)
     {
         Reanimation* aBodyReanim = mApp->ReanimationGet(mBodyReanimID);
-        if (TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_SPIKE) || mBodyHealth <= 0)
+        if (TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_SPIKE)) || mBodyHealth <= 0)
         {
             aBodyReanim->SetImageOverride("Zombie_catapult_siding", IMAGE_REANIM_ZOMBIE_CATAPULT_SIDING_DAMAGE);
             CatapultDeath(theDamageFlags);
@@ -7919,7 +7919,7 @@ void Zombie::TakeBodyDamage(int theDamage, unsigned int theDamageFlags)
     }
     else if (mZombieType == ZombieType::ZOMBIE_BOSS)
     {
-        if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH))
+        if (!TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH)))
         {
             mApp->PlayFoley(FoleyType::FOLEY_SHIELD_HIT);
         }
@@ -7983,10 +7983,10 @@ void Zombie::TakeDamage(int theDamage, unsigned int theDamageFlags)
     {
         aDamageRemaining = TakeFlyingDamage(aDamageRemaining, theDamageFlags);
     }
-    if (aDamageRemaining > 0 && mShieldType != ShieldType::SHIELDTYPE_NONE && !TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_BYPASSES_SHIELD))
+    if (aDamageRemaining > 0 && mShieldType != ShieldType::SHIELDTYPE_NONE && !TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_BYPASSES_SHIELD)))
     {
         aDamageRemaining = TakeShieldDamage(aDamageRemaining, theDamageFlags);
-        if (TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_HITS_SHIELD_AND_BODY))
+        if (TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_HITS_SHIELD_AND_BODY)))
         {
             aDamageRemaining = theDamage;
         }
@@ -8090,12 +8090,12 @@ bool Zombie::CanBeFrozen()
 //0x531A80
 bool Zombie::EffectedByDamage(unsigned int theDamageRangeFlags)
 {
-    if (!TestBit(theDamageRangeFlags, (int)DamageRangeFlags::DAMAGES_DYING) && IsDeadOrDying())
+    if (!TestBit(theDamageRangeFlags, static_cast<int>(DamageRangeFlags::DAMAGES_DYING)) && IsDeadOrDying())
     {
         return false;
     }
 
-    if (TestBit(theDamageRangeFlags, (int)DamageRangeFlags::DAMAGES_ONLY_MINDCONTROLLED))
+    if (TestBit(theDamageRangeFlags, static_cast<int>(DamageRangeFlags::DAMAGES_ONLY_MINDCONTROLLED)))
     {
         if (!mMindControlled)
         {
@@ -8155,7 +8155,7 @@ bool Zombie::EffectedByDamage(unsigned int theDamageRangeFlags)
         mZombiePhase == ZombiePhase::PHASE_BOBSLED_CRASHING || 
         mZombiePhase == ZombiePhase::PHASE_DANCER_RISING)
     {
-        return TestBit(theDamageRangeFlags, (int)DamageRangeFlags::DAMAGES_OFF_GROUND);
+        return TestBit(theDamageRangeFlags, static_cast<int>(DamageRangeFlags::DAMAGES_OFF_GROUND));
     }
 
     if (mZombieType != ZombieType::ZOMBIE_BOBSLED && GetZombieRect().mX > WIDE_BOARD_WIDTH)
@@ -8164,23 +8164,23 @@ bool Zombie::EffectedByDamage(unsigned int theDamageRangeFlags)
     }
 
     bool submerged = mZombieType == ZombieType::ZOMBIE_SNORKEL && mInPool && !mIsEating;
-    if (TestBit(theDamageRangeFlags, (int)DamageRangeFlags::DAMAGES_SUBMERGED) && submerged)
+    if (TestBit(theDamageRangeFlags, static_cast<int>(DamageRangeFlags::DAMAGES_SUBMERGED)) && submerged)
     {
         return true;
     }
 
     bool underground = mZombiePhase == ZombiePhase::PHASE_DIGGER_TUNNELING;
-    if (TestBit(theDamageRangeFlags, (int)DamageRangeFlags::DAMAGES_UNDERGROUND) && underground)
+    if (TestBit(theDamageRangeFlags, static_cast<int>(DamageRangeFlags::DAMAGES_UNDERGROUND)) && underground)
     {
         return true;
     }
 
-    if (TestBit(theDamageRangeFlags, (int)DamageRangeFlags::DAMAGES_FLYING) && IsFlying())
+    if (TestBit(theDamageRangeFlags, static_cast<int>(DamageRangeFlags::DAMAGES_FLYING)) && IsFlying())
     {
         return true;
     }
 
-    return TestBit(theDamageRangeFlags, (int)DamageRangeFlags::DAMAGES_GROUND) && !IsFlying() && !submerged && !underground;
+    return TestBit(theDamageRangeFlags, static_cast<int>(DamageRangeFlags::DAMAGES_GROUND)) && !IsFlying() && !submerged && !underground;
 }
 
 void Zombie::SetRow(int theRow)
@@ -8199,8 +8199,8 @@ void Zombie::RiseFromGrave(int theCol, int theRow)
     mPosX = mBoard->GridToPixelX(theCol, mRow) - 25;
     mPosY = GetPosYBasedOnRow(theRow);
     SetRow(theRow);
-    mX = (int)mPosX;
-    mY = (int)mPosY;
+    mX = static_cast<int>(mPosX);
+    mY = static_cast<int>(mPosY);
     mAltitude = CLIP_HEIGHT_OFF;
     mZombiePhase = ZombiePhase::PHASE_RISING_FROM_GRAVE;
     mPhaseCounter = 150;
@@ -8964,7 +8964,7 @@ void Zombie::PlayDeathAnim(unsigned int theDamageFlags)
         mYuckyFaceCounter = 0;
     }
 
-    if (TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_LEAVE_BODY))
+    if (TestBit(theDamageFlags, static_cast<int>(DamageFlags::DAMAGE_DOESNT_LEAVE_BODY)))
     {
         if (mZombieType != ZombieType::ZOMBIE_BOSS && mZombieType != ZombieType::ZOMBIE_GARGANTUAR && mZombieType != ZombieType::ZOMBIE_REDEYE_GARGANTUAR)
         {
@@ -9254,7 +9254,7 @@ void Zombie::UpdateDeath()
         {
             float aExplosionPosX = RandRangeFloat(600.0f, 750.0f);
             float aExplosionPosY = RandRangeFloat(50.0f, 300.0f);
-            mApp->AddTodParticle(aExplosionPosX, aExplosionPosY, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_BOSS_EXPLOSION);
+            mApp->AddTodParticle(aExplosionPosX, aExplosionPosY, static_cast<int>(RenderLayer::RENDER_LAYER_TOP), ParticleEffect::PARTICLE_BOSS_EXPLOSION);
             mApp->PlayFoley(FoleyType::FOLEY_BOSS_EXPLOSION_SMALL);
         }
 
@@ -10736,7 +10736,7 @@ void Zombie::EnableFuture(bool theEnableFuture)
     if (theEnableFuture)
     {
         Image* aImage = nullptr;
-        switch ((unsigned int)mBoard->ZombieGetID(this) % 4)
+        switch (static_cast<unsigned int>(mBoard->ZombieGetID(this)) % 4)
         {
         case 0:     aImage = IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES1;      break;
         case 1:     aImage = IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES2;      break;

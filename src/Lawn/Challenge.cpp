@@ -312,7 +312,7 @@ Challenge::Challenge()
 	for (int i = 0; i < 6; i++)
 		mReanimClouds[i] = REANIMATIONID_NULL;
 	memset(mBeghouledEated, 0, sizeof(mBeghouledEated));
-	for (int i = 0; i < (int)BeghouledUpgrade::NUM_BEGHOULED_UPGRADES; i++)
+	for (int i = 0; i < static_cast<int>(BeghouledUpgrade::NUM_BEGHOULED_UPGRADES); i++)
 		mBeghouledPurcasedUpgrade[i] = false;
 
 	if (mApp->mBoard && mApp->mGameMode == GAMEMODE_CHALLENGE_SLOT_MACHINE)
@@ -991,15 +991,15 @@ SeedType Challenge::BeghouledPickSeed(int theGridX, int theGridY, BeghouledBoard
 		default:	TOD_ASSERT(false);								break;
 		}
 
-		if (mBeghouledPurcasedUpgrade[(int)BeghouledUpgrade::BEGHOULED_UPGRADE_REPEATER] && aSeedType == SeedType::SEED_PEASHOOTER)
+		if (mBeghouledPurcasedUpgrade[static_cast<int>(BeghouledUpgrade::BEGHOULED_UPGRADE_REPEATER)] && aSeedType == SeedType::SEED_PEASHOOTER)
 		{
 			aSeedType = SeedType::SEED_REPEATER;
 		}
-		if (mBeghouledPurcasedUpgrade[(int)BeghouledUpgrade::BEGHOULED_UPGRADE_FUMESHROOM] && aSeedType == SeedType::SEED_PUFFSHROOM)
+		if (mBeghouledPurcasedUpgrade[static_cast<int>(BeghouledUpgrade::BEGHOULED_UPGRADE_FUMESHROOM)] && aSeedType == SeedType::SEED_PUFFSHROOM)
 		{
 			aSeedType = SeedType::SEED_FUMESHROOM;
 		}
-		if (mBeghouledPurcasedUpgrade[(int)BeghouledUpgrade::BEGHOULED_UPGRADE_TALLNUT] && aSeedType == SeedType::SEED_WALLNUT)
+		if (mBeghouledPurcasedUpgrade[static_cast<int>(BeghouledUpgrade::BEGHOULED_UPGRADE_TALLNUT)] && aSeedType == SeedType::SEED_WALLNUT)
 		{
 			aSeedType = SeedType::SEED_TALLNUT;
 		}
@@ -2009,7 +2009,7 @@ void Challenge::UpdateStormyNight()
 			mChallengeStateCounter = STORM_FLASH_TIME + RandRangeInt(300, aMaxDur);
 		}
 
-		mChallengeState = (ChallengeState)RandRangeInt((int)STATECHALLENGE_STORM_FLASH_1, (int)STATECHALLENGE_STORM_FLASH_3);
+		mChallengeState = static_cast<ChallengeState>(RandRangeInt(static_cast<int>(STATECHALLENGE_STORM_FLASH_1), static_cast<int>(STATECHALLENGE_STORM_FLASH_3)));
 	}
 }
 
@@ -2551,7 +2551,7 @@ void Challenge::InitZombieWavesFromList(ZombieType* theZombieList, int theListLe
 {
 	for (int i = 0; i < theListLength; i++)
 	{
-		mBoard->mZombieAllowed[(int)theZombieList[i]] = true;
+		mBoard->mZombieAllowed[static_cast<int>(theZombieList[i])] = true;
 	}
 }
 
@@ -2884,7 +2884,7 @@ void Challenge::WhackAZombieSpawning()
 				Plant* aPlant = mBoard->GetTopPlantAt(aGridItem->mGridX, aGridItem->mGridY, TOPPLANT_ONLY_NORMAL_POSITION);
 				if (aPlant == nullptr || aPlant->mSeedType != SEED_GRAVEBUSTER)
 				{
-					aGridPicks[aGridPicksCount].mItem = (intptr_t)aGridItem;
+					aGridPicks[aGridPicksCount].mItem = reinterpret_cast<intptr_t>(aGridItem);
 					aGridPicks[aGridPicksCount].mWeight = 1;
 					aGridPicksCount++;
 				}
@@ -2899,7 +2899,7 @@ void Challenge::WhackAZombieSpawning()
 		for (int i = 0; i < aZombieCount; i++)
 		{
 			TodWeightedArray* aGrid = TodPickArrayItemFromWeightedArray(aGridPicks, aGridPicksCount);
-			GridItem* aGraveStone = (GridItem*)aGrid->mItem;
+			GridItem* aGraveStone = reinterpret_cast<GridItem*>(aGrid->mItem);
 			aGrid->mWeight = 0;
 
 			if (aIsFinalWave)
@@ -3318,13 +3318,13 @@ void Challenge::MoveAPortal()
 		{
 			TOD_ASSERT(aNumpicks < MAX_PORTALS);
 			aPickArray[aNumpicks].mWeight = 1;
-			aPickArray[aNumpicks].mItem = (intptr_t)aGridItem;
+			aPickArray[aNumpicks].mItem = reinterpret_cast<intptr_t>(aGridItem);
 			aNumpicks++;
 		}
 	}
 
 	TOD_ASSERT(aNumpicks);
-	GridItem* aPortal = (GridItem*)TodPickFromWeightedArray(aPickArray, aNumpicks);
+	GridItem* aPortal = reinterpret_cast<GridItem*>(TodPickFromWeightedArray(aPickArray, aNumpicks));
 	GridItem* aOtherPortal = GetOtherPortal(aPortal);
 	TOD_ASSERT(aOtherPortal);
 
@@ -3820,7 +3820,7 @@ void Challenge::ScaryPotterChangePotType(GridItemState thePotType, int theCount)
 			if ((thePotType == GRIDITEM_STATE_SCARY_POT_LEAF && aGridItem->mScaryPotType == SCARYPOT_SEED) ||
 				(thePotType == GRIDITEM_STATE_SCARY_POT_ZOMBIE && aGridItem->mZombieType == ZOMBIE_GARGANTUAR))
 			{
-				aPotArray[aPotCount].mItem = (intptr_t)aGridItem;
+				aPotArray[aPotCount].mItem = reinterpret_cast<intptr_t>(aGridItem);
 				aPotArray[aPotCount].mWeight = 1;
 				aPotCount++;
 			}

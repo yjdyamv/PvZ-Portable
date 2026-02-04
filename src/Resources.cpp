@@ -2304,7 +2304,7 @@ bool Sexy::ExtractLoadingSoundsResources(ResourceManager* theManager)
 bool (*gExtractResourcesByName)(Sexy::ResourceManager* theResourceManager, const char* theName);
 
 // @Patoke: updated these
-void* gResources[(int)Sexy::ResourceId::RESOURCE_ID_MAX] =
+void* gResources[static_cast<int>(Sexy::ResourceId::RESOURCE_ID_MAX)] =
 {
 	&Sexy::IMAGE_BLANK,
 	&Sexy::IMAGE_POPCAP_LOGO,
@@ -3189,32 +3189,32 @@ void* gResources[(int)Sexy::ResourceId::RESOURCE_ID_MAX] =
 
 Sexy::Image* Sexy::GetImageById(ResourceId theId)
 {
-	return *(Sexy::Image**)gResources[(int)theId];
+	return *reinterpret_cast<Sexy::Image**>(gResources[static_cast<int>(theId)]);
 }
 
 Sexy::_Font* Sexy::GetFontById(ResourceId theId)
 {
-	return *(Sexy::_Font**)gResources[(int)theId];
+	return *reinterpret_cast<Sexy::_Font**>(gResources[static_cast<int>(theId)]);
 }
 
 int Sexy::GetSoundById(ResourceId theId)
 {
-	return *(int*)gResources[(int)theId];
+	return *reinterpret_cast<int*>(gResources[static_cast<int>(theId)]);
 }
 
 Image*& Sexy::GetImageRefById(ResourceId theId)
 {
-	return *(Image**)gResources[(int)theId];
+	return *reinterpret_cast<Image**>(gResources[static_cast<int>(theId)]);
 }
 
 _Font*& Sexy::GetFontRefById(ResourceId theId)
 {
-	return *(_Font**)gResources[(int)theId];
+	return *reinterpret_cast<_Font**>(gResources[static_cast<int>(theId)]);
 }
 
 int& Sexy::GetSoundRefById(ResourceId theId)
 {
-	return *(int*)gResources[(intptr_t)theId];
+	return *reinterpret_cast<int*>(gResources[static_cast<int>(theId)]);
 }
 
 Sexy::ResourceId Sexy::GetIdByImage(Image* theImage)
@@ -3241,7 +3241,7 @@ Sexy::ResourceId Sexy::GetIdByVariable(void* theVariable)
 	{
 		gNeedRecalcVariableToIdMap = false;
 		aMap.clear();
-		for (int i = 0; i < (int)ResourceId::RESOURCE_ID_MAX; i++)
+		for (int i = 0; i < static_cast<int>(ResourceId::RESOURCE_ID_MAX); i++)
 			aMap[gResources[i]] = i;
 	}
 

@@ -619,7 +619,7 @@ void AttachmentUpdateAndSetMatrix(AttachmentID& theAttachmentID, SexyTransform2D
 		return;
 
 	TOD_ASSERT(gEffectSystem);
-	Attachment* aAttachment = gEffectSystem->mAttachmentHolder->mAttachments.DataArrayTryToGet((unsigned int)theAttachmentID);
+	Attachment* aAttachment = gEffectSystem->mAttachmentHolder->mAttachments.DataArrayTryToGet(static_cast<unsigned int>(theAttachmentID));
 	if (aAttachment)
 	{
 		aAttachment->Update();
@@ -638,7 +638,7 @@ void AttachmentUpdateAndMove(AttachmentID& theAttachmentID, float theX, float th
 		return;
 
 	TOD_ASSERT(gEffectSystem);
-	Attachment* aAttachment = gEffectSystem->mAttachmentHolder->mAttachments.DataArrayTryToGet((unsigned int)theAttachmentID);
+	Attachment* aAttachment = gEffectSystem->mAttachmentHolder->mAttachments.DataArrayTryToGet(static_cast<unsigned int>(theAttachmentID));
 	if (aAttachment)
 	{
 		aAttachment->Update();
@@ -656,7 +656,7 @@ void AttachmentOverrideColor(AttachmentID& theAttachmentID, const Color& theColo
 		return;
 
 	TOD_ASSERT(gEffectSystem);
-	Attachment* aAttachment = gEffectSystem->mAttachmentHolder->mAttachments.DataArrayTryToGet((unsigned int)theAttachmentID);
+	Attachment* aAttachment = gEffectSystem->mAttachmentHolder->mAttachments.DataArrayTryToGet(static_cast<unsigned int>(theAttachmentID));
 	if (aAttachment)
 	{
 		aAttachment->OverrideColor(theColor);

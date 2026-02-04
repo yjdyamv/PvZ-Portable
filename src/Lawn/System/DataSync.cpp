@@ -534,7 +534,7 @@ void DataWriter::WriteDouble(double theDouble)
 //0x443810
 void DataWriter::WriteString(const std::string& theStr)
 {
-	uint16_t aStrLen = (uint16_t)theStr.length();
+	uint16_t aStrLen = static_cast<uint16_t>(theStr.length());
 	WriteUInt16(aStrLen);
-	WriteBytes(theStr.c_str(), (uint32_t)aStrLen);
+	WriteBytes(theStr.c_str(), static_cast<uint32_t>(aStrLen));
 }

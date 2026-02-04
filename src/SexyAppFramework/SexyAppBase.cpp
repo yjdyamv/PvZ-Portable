@@ -401,7 +401,7 @@ bool SexyAppBase::ReadDemoBuffer(std::string &theError)
 		Buffer aMarkerBuffer;
 
 		aBuffer = new uchar[aSize];
-		if (fread(aBuffer, 1, aSize, aFP) != (size_t)aSize) { delete [] aBuffer; return false; }
+		if (fread(aBuffer, 1, aSize, aFP) != static_cast<size_t>(aSize)) { delete [] aBuffer; return false; }
 		aMarkerBuffer.WriteBytes(aBuffer, aSize);
 		aMarkerBuffer.SeekFront();
 
@@ -438,7 +438,7 @@ bool SexyAppBase::ReadDemoBuffer(std::string &theError)
 
 
 	aBuffer = new uchar[aBytesLeft];
-	if (fread(aBuffer, 1, aBytesLeft, aFP) != (size_t)aBytesLeft) { delete [] aBuffer; return false; }		
+	if (fread(aBuffer, 1, aBytesLeft, aFP) != static_cast<size_t>(aBytesLeft)) { delete [] aBuffer; return false; }		
 
 	mDemoBuffer.WriteBytes(aBuffer, aBytesLeft);
 	mDemoBuffer.SeekFront();
@@ -503,7 +503,7 @@ void SexyAppBase::DemoSyncBuffer(Buffer* theBuffer)
 		uint32_t aLen = mDemoBuffer.ReadLong();
 		
 		theBuffer->Clear();
-		for (int i = 0; i < (int) aLen; i++)
+		for (int i = 0; i < static_cast<int>(aLen); i++)
 			theBuffer->WriteByte(mDemoBuffer.ReadByte());		
 	}
 	else if (mRecordingDemoBuffer)
@@ -512,7 +512,7 @@ void SexyAppBase::DemoSyncBuffer(Buffer* theBuffer)
 		mDemoBuffer.WriteNumBits(0, 1);
 		mDemoBuffer.WriteNumBits(DEMO_SYNC, 5);		
 		mDemoBuffer.WriteLong(theBuffer->GetDataLen());
-		mDemoBuffer.WriteBytes((uchar*) theBuffer->GetDataPtr(), theBuffer->GetDataLen());
+		mDemoBuffer.WriteBytes(theBuffer->GetDataPtr(), theBuffer->GetDataLen());
 	}
 }
 
@@ -808,7 +808,7 @@ double SexyAppBase::GetLoadingThreadProgress()
 		return 0.0;
 	if (mNumLoadingThreadTasks == 0)
 		return 0.0;
-	return std::min(mCompletedLoadingThreadTasks / (double) mNumLoadingThreadTasks, 1.0);
+	return std::min(mCompletedLoadingThreadTasks / static_cast<double>(mNumLoadingThreadTasks), 1.0);
 }
 
 bool SexyAppBase::RegistryWrite(const std::string& theValueName, uint32_t theType, const uchar* theValue, uint32_t theLength)
@@ -835,7 +835,7 @@ bool SexyAppBase::RegistryWrite(const std::string& theValueName, uint32_t theTyp
 	std::string aKeyName = RemoveTrailingSlash("SOFTWARE\\" + mRegKey);
 	std::string aValueName;
 
-	int aSlashPos = (int) theValueName.rfind('\\');
+	int aSlashPos = static_cast<int>(theValueName.rfind('\\'));
 	if (aSlashPos != -1)
 	{
 		aKeyName += "\\" + theValueName.substr(0, aSlashPos);
@@ -872,29 +872,29 @@ bool SexyAppBase::RegistryWrite(const std::string& theValueName, uint32_t theTyp
 
 bool SexyAppBase::RegistryWriteString(const std::string& theValueName, const std::string& theString)
 {
-	return RegistryWrite(theValueName, regemu::REGEMU_SZ, (uchar*) theString.c_str(), theString.length());
+	return RegistryWrite(theValueName, regemu::REGEMU_SZ, reinterpret_cast<const uchar*>(theString.c_str()), theString.length());
 }
 
 bool SexyAppBase::RegistryWriteInteger(const std::string& theValueName, int theValue)
 {
-	return RegistryWrite(theValueName, regemu::REGEMU_DWORD, (uchar*) &theValue, sizeof(int));
+	return RegistryWrite(theValueName, regemu::REGEMU_DWORD, reinterpret_cast<const uchar*>(&theValue), sizeof(int));
 }
 
 bool SexyAppBase::RegistryWriteBoolean(const std::string& theValueName, bool theValue)
 {
 	int aValue = theValue ? 1 : 0;
-	return RegistryWrite(theValueName, regemu::REGEMU_DWORD, (uchar*) &aValue, sizeof(int));
+	return RegistryWrite(theValueName, regemu::REGEMU_DWORD, reinterpret_cast<const uchar*>(&aValue), sizeof(int));
 }
 
 bool SexyAppBase::RegistryWriteData(const std::string& theValueName, const uchar* theValue, uint32_t theLength)
 {
-	return RegistryWrite(theValueName, regemu::REGEMU_BINARY, (uchar*) theValue, theLength);
+	return RegistryWrite(theValueName, regemu::REGEMU_BINARY, theValue, theLength);
 }
 
 void SexyAppBase::WriteToRegistry()
 {	
-	RegistryWriteInteger("MusicVolume", (int) (mMusicVolume * 100));
-	RegistryWriteInteger("SfxVolume", (int) (mSfxVolume * 100));
+	RegistryWriteInteger("MusicVolume", static_cast<int>(mMusicVolume * 100));
+	RegistryWriteInteger("SfxVolume", static_cast<int>(mSfxVolume * 100));
 	RegistryWriteInteger("Muted", (mMuteCount - mAutoMuteCount > 0) ? 1 : 0);
 	RegistryWriteInteger("ScreenMode", mIsWindowed ? 0 : 1);
 	RegistryWriteInteger("PreferredX", mPreferredX);
@@ -960,7 +960,7 @@ void SexyAppBase::RegistryEraseValue(const std::string& _theValueName)
 	std::string aKeyName = RemoveTrailingSlash("SOFTWARE\\" + mRegKey);
 	std::string aValueName;
 
-	int aSlashPos = (int) theValueName.rfind('\\');
+	int aSlashPos = static_cast<int>(theValueName.rfind('\\'));
 	if (aSlashPos != -1)
 	{
 		aKeyName += "\\" + theValueName.substr(0, aSlashPos);
@@ -1011,7 +1011,7 @@ bool SexyAppBase::RegistryReadKey(const std::string& theValueName, uint32_t* the
 		}
 		else
 		{
-			for (int i = 0; i < (int) aLen; i++)
+			for (int i = 0; i < static_cast<int>(aLen); i++)
 				mDemoBuffer.ReadByte();
 			return false;
 		}		
@@ -1021,7 +1021,7 @@ bool SexyAppBase::RegistryReadKey(const std::string& theValueName, uint32_t* the
 		std::string aKeyName = RemoveTrailingSlash("SOFTWARE\\" + mRegKey);
 		std::string aValueName;
 
-		int aSlashPos = (int) theValueName.rfind('\\');
+		int aSlashPos = static_cast<int>(theValueName.rfind('\\'));
 		if (aSlashPos != -1)
 		{
 			aKeyName += "\\" + theValueName.substr(0, aSlashPos);
@@ -1230,7 +1230,7 @@ bool SexyAppBase::ReadBufferFromFile(const std::string& theFileName, Buffer* the
 		uint32_t aLen = mDemoBuffer.ReadLong();		
 				
 		theBuffer->Clear();
-		for (int i = 0; i < (int) aLen; i++)
+		for (int i = 0; i < static_cast<int>(aLen); i++)
 			theBuffer->WriteByte(mDemoBuffer.ReadByte());
 
 		return true;		
@@ -1503,7 +1503,7 @@ static void CalculateFPS()
 	{
 		gFPSTimer.Stop();
 		if (!gForceDisplay)
-			gFPSDisplay = (int)(gFrameCount*1000/gFPSTimer.GetDuration() + 0.5f);
+			gFPSDisplay = static_cast<int>(gFrameCount * 1000 / gFPSTimer.GetDuration() + 0.5f);
 		else
 		{
 			gForceDisplay = false;
@@ -1586,7 +1586,7 @@ bool SexyAppBase::DrawDirtyStuff()
 	mIsDrawing = false;
 
 	if ((drewScreen || (aStartTime - mLastDrawTick >= 1000) || (mCustomCursorDirty)) &&
-		((int) (aStartTime - mNextDrawTick) >= 0))
+		(static_cast<int>(aStartTime - mNextDrawTick) >= 0))
 	{
 		mLastDrawWasEmpty = false;
 
@@ -1626,7 +1626,7 @@ bool SexyAppBase::DrawDirtyStuff()
 
 			mNextDrawTick += 35 + std::max(aTotalTime, 15);
 
-			if ((int) (aEndTime - mNextDrawTick) >= 0)			
+			if (static_cast<int>(aEndTime - mNextDrawTick) >= 0)			
 				mNextDrawTick = aEndTime;			
 		}
 		else
@@ -1945,20 +1945,20 @@ void SexyAppBase::ProcessDemo()
 						break;
 					case DEMO_KEY_DOWN:
 						{
-							KeyCode aKeyCode = (KeyCode) mDemoBuffer.ReadNumBits(8, false);
+							KeyCode aKeyCode = static_cast<KeyCode>(mDemoBuffer.ReadNumBits(8, false));
 							mWidgetManager->KeyDown(aKeyCode);
 						}
 						break;
 					case DEMO_KEY_UP:
 						{
-							KeyCode aKeyCode = (KeyCode) mDemoBuffer.ReadNumBits(8, false);
+							KeyCode aKeyCode = static_cast<KeyCode>(mDemoBuffer.ReadNumBits(8, false));
 							mWidgetManager->KeyUp(aKeyCode);
 						}
 						break;
 					case DEMO_KEY_CHAR:
 						{
-							int sizeMult = (int)mDemoBuffer.ReadNumBits(1, false) + 1; // will be 1 for single, 2 for double
-							char aChar = (char) mDemoBuffer.ReadNumBits(8*sizeMult, false);
+							int sizeMult = static_cast<int>(mDemoBuffer.ReadNumBits(1, false)) + 1; // will be 1 for single, 2 for double
+							char aChar = static_cast<char>(mDemoBuffer.ReadNumBits(8 * sizeMult, false));
 							mWidgetManager->KeyChar(aChar);
 						}
 						break;
@@ -2236,7 +2236,7 @@ bool SexyAppBase::Process(bool allowSleep)
 	if (mVSyncUpdates)
 	{
 		aFrameFTime = (1000.0 / mSyncRefreshRate) / mUpdateMultiplier;
-		anUpdatesPerUpdateF = (float) (1000.0 / (mFrameTime * mSyncRefreshRate));
+		anUpdatesPerUpdateF = static_cast<float>(1000.0 / (mFrameTime * mSyncRefreshRate));
 	}
 	else
 	{
@@ -2288,7 +2288,7 @@ bool SexyAppBase::Process(bool allowSleep)
 						mPendingUpdatesAcc -= 1.0;
 					}
 										
-					DoUpdateFramesF((float) anUpdatesPerUpdateF);					
+					DoUpdateFramesF(static_cast<float>(anUpdatesPerUpdateF));					
 					ProcessSafeDeleteList();
 				}
 
@@ -2339,14 +2339,14 @@ bool SexyAppBase::Process(bool allowSleep)
 		
 		if (mUpdateAppState == UPDATESTATE_PROCESS_1)
 		{
-			if ((++mNonDrawCount < (int) ceil(10*mUpdateMultiplier)) || (!mLoaded))
+			if ((++mNonDrawCount < static_cast<int>(ceil(10 * mUpdateMultiplier))) || (!mLoaded))
 			{
 				bool doUpdate = false;
 				
 				if (isVSynched)
 				{
 					// Synch'ed to vertical refresh, so update as soon as possible after draw
-					doUpdate = (!mHasPendingDraw) || (mUpdateFTimeAcc >= (int) (aFrameFTime * 0.75));
+					doUpdate = (!mHasPendingDraw) || (mUpdateFTimeAcc >= static_cast<int>(aFrameFTime * 0.75));
 				}
 				else if (mUpdateFTimeAcc >= aFrameFTime)
 				{
@@ -2360,7 +2360,7 @@ bool SexyAppBase::Process(bool allowSleep)
 					if ((!mPlayingDemoBuffer) && (mUpdateMultiplier == 1.0))
 					{
 						mVSyncBrokenTestUpdates++;
-						if (mVSyncBrokenTestUpdates >= (uint32_t) ((1000+mFrameTime-1)/mFrameTime))
+						if (mVSyncBrokenTestUpdates >= static_cast<uint32_t>((1000 + mFrameTime - 1) / mFrameTime))
 						{
 							// It has to be running 33% fast to be "broken" (25% = 1/0.800)
 							if (aStartTime - mVSyncBrokenTestStartTick <= 800)
@@ -2414,7 +2414,7 @@ bool SexyAppBase::Process(bool allowSleep)
 			}					
 
 			//aNumCalls++;
-			DoUpdateFramesF((float) anUpdatesPerUpdateF);
+			DoUpdateFramesF(static_cast<float>(anUpdatesPerUpdateF));
 			ProcessSafeDeleteList();		
 		
 			// Don't let mUpdateFTimeAcc dip below 0
@@ -2446,7 +2446,7 @@ bool SexyAppBase::Process(bool allowSleep)
 			else
 			{
 				// Let us take into account the time it took to draw dirty stuff			
-				int aTimeToNextFrame = (int) (aFrameFTime - mUpdateFTimeAcc);
+				int aTimeToNextFrame = static_cast<int>(aFrameFTime - mUpdateFTimeAcc);
 				if (aTimeToNextFrame > 0)
 				{
 					if (!allowSleep)
@@ -3217,7 +3217,7 @@ Sexy::GLImage* SexyAppBase::CreateCrossfadeImage(Sexy::Image* theImage1, const R
 
 	int aSrc1Width = aMemoryImage1->GetWidth();
 	int aSrc2Width = aMemoryImage2->GetWidth();
-	uint32_t aMult = (int) (theFadeFactor*256);
+	uint32_t aMult = static_cast<uint32_t>(theFadeFactor * 256);
 	uint32_t aOMM = (256 - aMult);
 
 	for (int y = 0; y < aHeight; y++)
@@ -3496,26 +3496,26 @@ void SexyAppBase::RotateImageHue(Sexy::MemoryImage *theImage, int theDelta)
 		double v= (l < 128) ? (l * (255+s))/255 :
 				(l+s-l*s/255);
 		
-		int y = (int) (2*l-v);
+		int y = static_cast<int>(2 * l - v);
 
 		int aColorDiv = (6 * h) / 256;
-		int x = (int)(y+(v-y)*((h - (aColorDiv * 256 / 6)) * 6)/255);
+		int x = static_cast<int>(y + (v - y) * ((h - (aColorDiv * 256 / 6)) * 6) / 255);
 		if (x > 255)
 			x = 255;
 
-		int z = (int) (v-(v-y)*((h - (aColorDiv * 256 / 6)) * 6)/255);
+		int z = static_cast<int>(v - (v - y) * ((h - (aColorDiv * 256 / 6)) * 6) / 255);
 		if (z < 0)
 			z = 0;
 		
 		switch (aColorDiv)
 		{
-			case 0: r = (int) v; g = x; b = y; break;
-			case 1: r = z; g= (int) v; b = y; break;
-			case 2: r = y; g= (int) v; b = x; break;
-			case 3: r = y; g = z; b = (int) v; break;
-			case 4: r = x; g = y; b = (int) v; break;
-			case 5: r = (int) v; g = y; b = z; break;
-			default: r = (int) v; g = x; b = y; break;
+			case 0: r = static_cast<int>(v); g = x; b = y; break;
+			case 1: r = z; g = static_cast<int>(v); b = y; break;
+			case 2: r = y; g = static_cast<int>(v); b = x; break;
+			case 3: r = y; g = z; b = static_cast<int>(v); break;
+			case 4: r = x; g = y; b = static_cast<int>(v); break;
+			case 5: r = static_cast<int>(v); g = y; b = z; break;
+			default: r = static_cast<int>(v); g = x; b = y; break;
 		}
 
 		*aPtr++ = alpha | (r<<16) | (g << 8) | (b);	 
@@ -3534,26 +3534,26 @@ uint32_t SexyAppBase::HSLToRGB(int h, int s, int l)
 	double v= (l < 128) ? (l * (255+s))/255 :
 			(l+s-l*s/255);
 	
-	int y = (int) (2*l-v);
+	int y = static_cast<int>(2 * l - v);
 
 	int aColorDiv = (6 * h) / 256;
-	int x = (int)(y+(v-y)*((h - (aColorDiv * 256 / 6)) * 6)/255);
+	int x = static_cast<int>(y + (v - y) * ((h - (aColorDiv * 256 / 6)) * 6) / 255);
 	if (x > 255)
 		x = 255;
 
-	int z = (int) (v-(v-y)*((h - (aColorDiv * 256 / 6)) * 6)/255);
+	int z = static_cast<int>(v - (v - y) * ((h - (aColorDiv * 256 / 6)) * 6) / 255);
 	if (z < 0)
 		z = 0;
 	
 	switch (aColorDiv)
 	{
-		case 0: r = (int) v; g = x; b = y; break;
-		case 1: r = z; g= (int) v; b = y; break;
-		case 2: r = y; g= (int) v; b = x; break;
-		case 3: r = y; g = z; b = (int) v; break;
-		case 4: r = x; g = y; b = (int) v; break;
-		case 5: r = (int) v; g = y; b = z; break;
-		default: r = (int) v; g = x; b = y; break;
+		case 0: r = static_cast<int>(v); g = x; b = y; break;
+		case 1: r = z; g = static_cast<int>(v); b = y; break;
+		case 2: r = y; g = static_cast<int>(v); b = x; break;
+		case 3: r = y; g = z; b = static_cast<int>(v); break;
+		case 4: r = x; g = y; b = static_cast<int>(v); break;
+		case 5: r = static_cast<int>(v); g = y; b = z; break;
+		default: r = static_cast<int>(v); g = x; b = y; break;
 	}
 
 	return 0xFF000000 | (r << 16) | (g << 8) | (b);
@@ -3762,7 +3762,7 @@ void SexyAppBase::DemoSyncRefreshRate()
 		mDemoBuffer.WriteNumBits(0, 1);
 		mDemoBuffer.WriteNumBits(DEMO_VIDEO_DATA, 5);
 		mDemoBuffer.WriteBoolean(mIsWindowed);
-		uchar aByte = (uchar) mSyncRefreshRate;
+		uchar aByte = static_cast<uchar>(mSyncRefreshRate);
 		mDemoBuffer.WriteByte(aByte);		
 	}
 }

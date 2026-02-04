@@ -18,7 +18,7 @@ MessageWidget::MessageWidget(LawnApp* theApp)
 	mLabelNext[0] = '\0';
 	mMessageStyleNext = MessageStyle::MESSAGE_STYLE_OFF;
 	mSlideOffTime = 100;
-	memset(mTextReanimID, (int)ReanimationID::REANIMATIONID_NULL, MAX_MESSAGE_LENGTH);
+	memset(mTextReanimID, static_cast<int>(ReanimationID::REANIMATIONID_NULL), MAX_MESSAGE_LENGTH);
 }
 
 //0x458FC0

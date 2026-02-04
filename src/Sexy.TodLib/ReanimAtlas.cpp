@@ -25,10 +25,10 @@ void ReanimAtlas::ReanimAtlasDispose()
 
 ReanimAtlasImage* ReanimAtlas::GetEncodedReanimAtlas(Image* theImage)
 {
-	if (theImage == nullptr || (intptr_t)theImage > 1000)
+	if (theImage == nullptr || reinterpret_cast<intptr_t>(theImage) > 1000)
 		return nullptr;
 
-	intptr_t aAtlasIndex = (intptr_t)theImage - 1;
+	intptr_t aAtlasIndex = reinterpret_cast<intptr_t>(theImage) - 1;
 	TOD_ASSERT(aAtlasIndex >= 0 && aAtlasIndex < mImageCount);
 	return &mImageArray[aAtlasIndex];
 }
@@ -64,7 +64,7 @@ bool sSortByNonIncreasingHeight(const ReanimAtlasImage& image1, const ReanimAtla
 	else if (image1.mWidth != image2.mWidth)
 		return image1.mWidth > image2.mWidth;
 	else
-		return (uintptr_t)&image1 > (uintptr_t)&image2;
+		return reinterpret_cast<uintptr_t>(&image1) > reinterpret_cast<uintptr_t>(&image2);
 }
 
 static int GetClosestPowerOf2Above(int theNum)

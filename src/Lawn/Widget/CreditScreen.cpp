@@ -457,7 +457,7 @@ void CreditScreen::PreLoadCredits()
     ReanimatorEnsureDefinitionLoaded(ReanimationType::REANIM_SUNSHROOM, true);
     ReanimationPreload(ReanimationType::REANIM_SUNSHROOM);
 
-    ReanimatorDefinition* aMain2Def = &gReanimatorDefArray[(int)ReanimationType::REANIM_CREDITS_MAIN2];
+    ReanimatorDefinition* aMain2Def = &gReanimatorDefArray[static_cast<int>(ReanimationType::REANIM_CREDITS_MAIN2)];
     for (int aTrackIndex = 0; aTrackIndex < aMain2Def->mTracks.count; aTrackIndex++)
     {
         ReanimatorTrack* aTrack = &aMain2Def->mTracks.tracks[aTrackIndex];
@@ -470,7 +470,7 @@ void CreditScreen::PreLoadCredits()
             }
         }
     }
-    ReanimatorDefinition* aMain3Def = &gReanimatorDefArray[(int)ReanimationType::REANIM_CREDITS_MAIN3];
+    ReanimatorDefinition* aMain3Def = &gReanimatorDefArray[static_cast<int>(ReanimationType::REANIM_CREDITS_MAIN3)];
     for (int aTrackIndex = 0; aTrackIndex < aMain3Def->mTracks.count; aTrackIndex++)
     {
         ReanimatorTrack* aTrack = &aMain3Def->mTracks.tracks[aTrackIndex];
@@ -483,7 +483,7 @@ void CreditScreen::PreLoadCredits()
             }
         }
     }
-    ReanimatorDefinition* aUndeadDef = &gReanimatorDefArray[(int)ReanimationType::REANIM_CREDITS_WEARETHEUNDEAD];
+    ReanimatorDefinition* aUndeadDef = &gReanimatorDefArray[static_cast<int>(ReanimationType::REANIM_CREDITS_WEARETHEUNDEAD)];
     for (int aTrackIndex = 0; aTrackIndex < aUndeadDef->mTracks.count; aTrackIndex++)
     {
         ReanimatorTrack* aTrack = &aUndeadDef->mTracks.tracks[aTrackIndex];
@@ -1104,7 +1104,7 @@ void CreditScreen::Update()
 
         if (aUnsyncedDuration > 10000)
         {
-            JumpToFrame((CreditsPhase)((int)mCreditsPhase + 1), 0.0f);
+            JumpToFrame(static_cast<CreditsPhase>(static_cast<int>(mCreditsPhase) + 1), 0.0f);
             aUnsyncedFrames = 0;
         }
         while (aUnsyncedFrames > 0)
@@ -1166,11 +1166,11 @@ void CreditScreen::UpdateMovie()
             aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 140.0f) ||
             aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 142.0f))
         {
-            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDIT_STROBE);
+            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, static_cast<int>(RenderLayer::RENDER_LAYER_TOP), ParticleEffect::PARTICLE_CREDIT_STROBE);
         }
         if (aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 136.5f))
         {
-            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDITS_RAYSWIPE);
+            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, static_cast<int>(RenderLayer::RENDER_LAYER_TOP), ParticleEffect::PARTICLE_CREDITS_RAYSWIPE);
         }
         if (aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 330.0f))
         {
@@ -1219,7 +1219,7 @@ void CreditScreen::UpdateMovie()
 
         if (aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 120.0f))
         {
-            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDITS_ZOMBIEHEADWIPE);
+            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, static_cast<int>(RenderLayer::RENDER_LAYER_TOP), ParticleEffect::PARTICLE_CREDITS_ZOMBIEHEADWIPE);
         }
     }
     if (mCreditsPhase == CreditsPhase::CREDITS_MAIN2)
@@ -1261,11 +1261,11 @@ void CreditScreen::UpdateMovie()
             aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 239.5f) ||
             aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 243.5f))
         {
-            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDIT_STROBE);
+            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, static_cast<int>(RenderLayer::RENDER_LAYER_TOP), ParticleEffect::PARTICLE_CREDIT_STROBE);
         }
         if (aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 332.75f))
         {
-            mApp->AddTodParticle(678.0f, 352.0f, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_MELONSPLASH);
+            mApp->AddTodParticle(678.0f, 352.0f, static_cast<int>(RenderLayer::RENDER_LAYER_TOP), ParticleEffect::PARTICLE_MELONSPLASH);
         }
         if (aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 336.0f))
         {
@@ -1280,7 +1280,7 @@ void CreditScreen::UpdateMovie()
         }
         if (aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 342.0f))
         {
-            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDIT_STROBE);
+            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, static_cast<int>(RenderLayer::RENDER_LAYER_TOP), ParticleEffect::PARTICLE_CREDIT_STROBE);
         }
 
         int aBackground2Index = aCreditsReanim->FindTrackIndex("Background2");
@@ -1290,7 +1290,7 @@ void CreditScreen::UpdateMovie()
         float aFogPosX = aTransformBackground2.mTransX + 856.0f;
         if (aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 188.0f))
         {
-            TodParticleSystem* aFogParticle = mApp->AddTodParticle(aFogPosX, 230.0f, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDITS_FOG);
+            TodParticleSystem* aFogParticle = mApp->AddTodParticle(aFogPosX, 230.0f, static_cast<int>(RenderLayer::RENDER_LAYER_TOP), ParticleEffect::PARTICLE_CREDITS_FOG);
             mFogParticleID = mApp->ParticleGetID(aFogParticle);
         }
         TodParticleSystem* aFogParticle = mApp->ParticleTryToGet(mFogParticleID);
@@ -1327,7 +1327,7 @@ void CreditScreen::UpdateMovie()
             aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 243.0f) ||
             aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 247.0f))
         {
-            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDIT_STROBE);
+            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, static_cast<int>(RenderLayer::RENDER_LAYER_TOP), ParticleEffect::PARTICLE_CREDIT_STROBE);
         }
     }
 
@@ -1470,7 +1470,7 @@ void CreditScreen::JumpToFrame(CreditsPhase thePhase, float theFrame)
     }
     else
     {
-        aReanim = PlayReanim((int)thePhase + 1);
+        aReanim = PlayReanim(static_cast<int>(thePhase) + 1);
     }
 
     float aFrameFactor = 1.0f / (aReanim->mDefinition->mTracks.tracks->mTransforms.count - 1);
