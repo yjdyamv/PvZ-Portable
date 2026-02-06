@@ -1,6 +1,7 @@
 #ifndef __IMAGELIB_H__
 #define __IMAGELIB_H__
 
+#include <cstdint>
 #include <string>
 
 namespace ImageLib

@@ -4,6 +4,10 @@
 #include "ImageLib.h"
 #include "png.h"
 #include <math.h>
+#include <algorithm>
+#include <array>
+#include <cctype>
+#include <string_view>
 #include "paklib/PakInterface.h"
 
 extern "C"
@@ -13,6 +17,7 @@ extern "C"
 }
 
 using namespace ImageLib;
+using namespace std::string_view_literals;
 
 Image::Image()
 {
@@ -1299,124 +1304,183 @@ static unsigned char *Rescale(int Width, int Height, int NewWidth, int NewHeight
 	return pTmpData;
 }
 
+using ImageLoader = Image* (*)(const std::string&);
+using ImageExtEntry = std::pair<std::string_view, ImageLoader>;
+static constexpr std::array<ImageExtEntry, 4> kImageExts = {
+	ImageExtEntry{ ".png"sv, GetPNGImage },
+	ImageExtEntry{ ".jpg"sv, GetJPEGImage },
+	ImageExtEntry{ ".gif"sv, GetGIFImage },
+	ImageExtEntry{ ".tga"sv, GetTGAImage },
+};
+
+static bool EqualsIgnoreCase(std::string_view theLeft, std::string_view theRight)
+{
+	if (theLeft.size() != theRight.size())
+		return false;
+
+	for (size_t i = 0; i < theLeft.size(); i++)
+	{
+		const unsigned char aLeftChar = static_cast<unsigned char>(theLeft[i]);
+		const unsigned char aRightChar = static_cast<unsigned char>(theRight[i]);
+		if (std::tolower(aLeftChar) != std::tolower(aRightChar))
+			return false;
+	}
+
+	return true;
+}
+
+static bool CheckSinglePath(std::string_view thePath)
+{
+	if (thePath.empty())
+		return false;
+
+	if (gPakInterface)
+	{
+		if (gPakInterface->mPakRecordMap.contains(PakInterface::NormalizePakPath(thePath)))
+			return true;
+	}
+
+	const std::string aPathString(thePath);
+	const std::filesystem::path aFilePath = Sexy::PathFromU8(aPathString);
+	if (!aFilePath.has_root_path())
+	{
+		const auto& aResourceBase = Sexy::GetResourceFolder();
+		if (!aResourceBase.empty())
+			return Sexy::FileExists(Sexy::GetResourcePath(aPathString));
+	}
+
+	return Sexy::FileExists(aPathString);
+}
+
+static bool FastFileExists(std::string_view thePath)
+{
+	if (thePath.empty())
+		return false;
+
+	const auto aFilePath = Sexy::PathFromU8(std::string(thePath));
+	if (aFilePath.has_extension())
+		return CheckSinglePath(thePath);
+
+	std::string aCandidate(thePath);
+	const auto aBaseLen = aCandidate.size();
+	for (const auto& [aExt, _] : kImageExts)
+	{
+		aCandidate.resize(aBaseLen);
+		aCandidate.append(aExt);
+		if (CheckSinglePath(aCandidate))
+			return true;
+	}
+
+	return false;
+}
+
+static Image* TryLoadByExt(const std::string& theBaseName, std::string_view theExt)
+{
+	for (const auto& [aKnownExt, aLoader] : kImageExts)
+	{
+		if (theExt.empty() || EqualsIgnoreCase(theExt, aKnownExt))
+		{
+			if (Image* aImage = aLoader(theBaseName + std::string(aKnownExt)))
+				return aImage;
+		}
+	}
+	return nullptr;
+}
+
+static void ComposeAlpha(Image* theImage, Image* theAlphaImage)
+{
+	if (theImage->mWidth != theAlphaImage->mWidth ||
+		theImage->mHeight != theAlphaImage->mHeight)
+		return;
+
+	uint32_t* aDstBits = theImage->mBits;
+	const uint32_t* aSrcBits = theAlphaImage->mBits;
+	const int aSize = theImage->mWidth * theImage->mHeight;
+
+	for (int i = 0; i < aSize; i++)
+		aDstBits[i] = (aDstBits[i] & 0x00FFFFFF) | ((aSrcBits[i] & 0xFF) << 24);
+}
+
+static void ApplyAlphaAsImage(Image* theImage, uint32_t theBaseColor)
+{
+	uint32_t* aBits = theImage->mBits;
+	const int aSize = theImage->mWidth * theImage->mHeight;
+
+	for (int i = 0; i < aSize; i++)
+		aBits[i] = theBaseColor | ((aBits[i] & 0xFF) << 24);
+}
+
 Image* ImageLib::GetImage(const std::string& theFilename, bool lookForAlphaImage)
 {
 	if (!gAutoLoadAlpha)
 		lookForAlphaImage = false;
 
-	int aLastDotPos = theFilename.rfind('.');
-	int aLastSlashPos = (int)theFilename.rfind('/');
+	const auto aLastSlashPos = theFilename.rfind('/');
+	const auto aLastDotPos = theFilename.rfind('.');
 
-	std::string anExt;
+	std::string_view anExt;
 	std::string aFilename;
 
-	if (aLastDotPos > aLastSlashPos)
+	if (aLastDotPos != std::string::npos &&
+		(aLastSlashPos == std::string::npos || aLastDotPos > aLastSlashPos))
 	{
-		anExt = theFilename.substr(aLastDotPos, theFilename.length() - aLastDotPos);
+		anExt = std::string_view(theFilename).substr(aLastDotPos);
 		aFilename = theFilename.substr(0, aLastDotPos);
 	}
 	else
 		aFilename = theFilename;
 
-	Image* anImage = nullptr;
+	// Load image, trying each supported format
+	Image* anImage = TryLoadByExt(aFilename, anExt);
 
-	if ((anImage == nullptr) && ((strcasecmp(anExt.c_str(), ".png") == 0) || (anExt.length() == 0)))
-		anImage = GetPNGImage(aFilename + ".png");
-
-	if ((anImage == nullptr) && ((strcasecmp(anExt.c_str(), ".jpg") == 0) || (anExt.length() == 0)))
-		anImage = GetJPEGImage(aFilename + ".jpg");
-
-	if ((anImage == nullptr) && ((strcasecmp(anExt.c_str(), ".gif") == 0) || (anExt.length() == 0)))
-		anImage = GetGIFImage(aFilename + ".gif");
-
-	if ((anImage == nullptr) && ((strcasecmp(anExt.c_str(), ".tga") == 0) || (anExt.length() == 0)))
-		anImage = GetTGAImage(aFilename + ".tga");
-
-	if ((anImage == nullptr) && (strcasecmp(anExt.c_str(), ".j2k") == 0))
-		unreachable(); // There are no JPEG2000 files in the project
-		//anImage = GetJPEG2000Image(aFilename + ".j2k");
-	if ((anImage == nullptr) && (strcasecmp(anExt.c_str(), ".jp2") == 0))
-		unreachable(); // There are no JPEG2000 files in the project
-		//anImage = GetJPEG2000Image(aFilename + ".jp2");
-
-
+	// Downscale only when configured to do so
+#if IMG_DOWNSCALE != 1
 	if (anImage)
 	{
-		int aNewWidth = anImage->mWidth/IMG_DOWNSCALE;
-		int aNewHeight = anImage->mHeight/IMG_DOWNSCALE;
+		const int aNewWidth = anImage->mWidth / IMG_DOWNSCALE;
+		const int aNewHeight = anImage->mHeight / IMG_DOWNSCALE;
 		if (aNewWidth > 0 && aNewHeight > 0)
 		{
-			unsigned char* aNewData = Rescale(anImage->mWidth, anImage->mHeight, aNewWidth, aNewHeight, (unsigned char*)anImage->mBits);
+			auto* aNewData = Rescale(anImage->mWidth, anImage->mHeight, aNewWidth, aNewHeight, (unsigned char*)anImage->mBits);
 			delete[] anImage->mBits;
 			anImage->mBits = (uint32_t*)aNewData;
 			anImage->mWidth = aNewWidth;
 			anImage->mHeight = aNewHeight;
 		}
 	}
+#endif
 
-	// Check for alpha images
+	// Probe alpha images with fast existence check
 	Image* anAlphaImage = nullptr;
-	if(lookForAlphaImage)
+	if (lookForAlphaImage)
 	{
-		// Check _ImageName
-		anAlphaImage = GetImage(theFilename.substr(0, aLastSlashPos+1) + "_" +
-			theFilename.substr(aLastSlashPos+1, theFilename.length() - aLastSlashPos - 1), false);
+		const auto slashEnd = (aLastSlashPos != std::string::npos) ? aLastSlashPos + 1 : 0;
+		const std::string alphaPath1 = theFilename.substr(0, slashEnd) + "_" +
+			theFilename.substr(slashEnd);
 
-		// Check ImageName_
-		if(anAlphaImage==nullptr)
-			anAlphaImage = GetImage(theFilename + "_", false);
+		if (FastFileExists(alphaPath1))
+			anAlphaImage = GetImage(alphaPath1, false);
+
+		if (!anAlphaImage)
+		{
+			const std::string alphaPath2 = theFilename + "_";
+			if (FastFileExists(alphaPath2))
+				anAlphaImage = GetImage(alphaPath2, false);
+		}
 	}
 
-
-
 	// Compose alpha channel with image
-	if (anAlphaImage != nullptr) 
+	if (anAlphaImage)
 	{
-		if (anImage != nullptr)
+		if (anImage)
 		{
-			if ((anImage->mWidth == anAlphaImage->mWidth) &&
-				(anImage->mHeight == anAlphaImage->mHeight))
-			{
-				uint32_t* aBits1 = anImage->mBits;
-				uint32_t* aBits2 = anAlphaImage->mBits;
-				int aSize = anImage->mWidth*anImage->mHeight;
-
-				for (int i = 0; i < aSize; i++)
-				{
-					*aBits1 = (*aBits1 & 0x00FFFFFF) | ((*aBits2 & 0xFF) << 24);
-					++aBits1;
-					++aBits2;
-				}
-			}
-
+			ComposeAlpha(anImage, anAlphaImage);
 			delete anAlphaImage;
-		}
-		else if (gAlphaComposeColor==0xFFFFFF)
-		{
-			anImage = anAlphaImage;
-
-			uint32_t* aBits1 = anImage->mBits;
-
-			int aSize = anImage->mWidth*anImage->mHeight;
-			for (int i = 0; i < aSize; i++)
-			{
-				*aBits1 = (0x00FFFFFF) | ((*aBits1 & 0xFF) << 24);
-				++aBits1;
-			}
 		}
 		else
 		{
-			const int aColor = gAlphaComposeColor;
 			anImage = anAlphaImage;
-
-			uint32_t* aBits1 = anImage->mBits;
-
-			int aSize = anImage->mWidth*anImage->mHeight;
-			for (int i = 0; i < aSize; i++)
-			{
-				*aBits1 = aColor | ((*aBits1 & 0xFF) << 24);
-				++aBits1;
-			}
+			ApplyAlphaAsImage(anImage, static_cast<uint32_t>(gAlphaComposeColor));
 		}
 	}
 

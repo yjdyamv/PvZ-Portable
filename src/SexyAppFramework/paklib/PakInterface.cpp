@@ -27,38 +27,38 @@ PakInterface::~PakInterface()
 }
 
 // Normalize path for pak lookup.
-static std::string NormalizePakPath(const char* theFileName)
+std::string PakInterface::NormalizePakPath(std::string_view theFileName)
 {
-	std::filesystem::path filePath = Sexy::PathFromU8(theFileName);
+	std::filesystem::path aFilePath = Sexy::PathFromU8(std::string(theFileName));
 
 	// Make absolute paths relative to resource folder.
-	if (filePath.is_absolute())
+	if (aFilePath.has_root_directory())
 	{
-		const std::string& resourceFolder = Sexy::GetResourceFolder();
-		if (!resourceFolder.empty())
+		const std::string& aResourceFolder = Sexy::GetResourceFolder();
+		if (!aResourceFolder.empty())
 		{
-			std::filesystem::path resPath = Sexy::PathFromU8(resourceFolder);
-			auto [resEnd, fileIt] = std::mismatch(resPath.begin(), resPath.end(), 
-			                                       filePath.begin(), filePath.end());
-			if (resEnd == resPath.end())
+			std::filesystem::path aResPath = Sexy::PathFromU8(aResourceFolder);
+			auto [aResEnd, aFileIt] = std::mismatch(aResPath.begin(), aResPath.end(), 
+			                                       aFilePath.begin(), aFilePath.end());
+			if (aResEnd == aResPath.end())
 			{
-				std::filesystem::path relativePath;
-				for (; fileIt != filePath.end(); ++fileIt)
-					relativePath /= *fileIt;
-				filePath = relativePath;
+				std::filesystem::path aRelativePath;
+				for (; aFileIt != aFilePath.end(); ++aFileIt)
+					aRelativePath /= *aFileIt;
+				aFilePath = aRelativePath;
 			}
 		}
 	}
 
-	std::string result = Sexy::PathToU8(filePath.lexically_normal());
+	std::string aResult = Sexy::PathToU8(aFilePath.lexically_normal());
 	
-	if (result.size() >= 2 && result[0] == '.' && result[1] == '/')
-		result = result.substr(2);
+	if (aResult.size() >= 2 && aResult[0] == '.' && aResult[1] == '/')
+		aResult = aResult.substr(2);
 	
-	std::transform(result.begin(), result.end(), result.begin(),
+	std::transform(aResult.begin(), aResult.end(), aResult.begin(),
 	               [](unsigned char c) { return std::toupper(c); });
 	
-	return result;
+	return aResult;
 }
 
 bool PakInterface::AddPakFile(const std::string& theFileName)
@@ -85,7 +85,7 @@ bool PakInterface::AddPakFile(const std::string& theFileName)
 	for (size_t i = 0; i < aFileSize; i++)
 		*aDataPtr++ ^= 0xF7;
 
-	std::string aPakKey = NormalizePakPath(theFileName.c_str());
+	std::string aPakKey = NormalizePakPath(theFileName);
 	auto aRecordItr = mPakRecordMap.emplace(aPakKey, PakRecord()).first;
 	PakRecord* aPakRecord = &aRecordItr->second;
 	aPakRecord->mCollection = aPakCollection;
