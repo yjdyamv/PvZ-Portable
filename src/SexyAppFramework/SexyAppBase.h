@@ -165,9 +165,8 @@ public:
 
 
 	bool					mOnlyAllowOneCopyToRun;
-	unsigned int					mNotifyGameMessage;
+	unsigned int			mNotifyGameMessage;
 	std::mutex				mCritSect;	
-	bool					mBetaValidate;
 	uchar					mAdd8BitMaxTable[512];
 	WidgetManager*			mWidgetManager;
 	DialogMap				mDialogMap;
