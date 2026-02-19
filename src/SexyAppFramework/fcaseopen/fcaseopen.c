@@ -47,7 +47,7 @@ char *strsep(char **stringp, const char *delim)
 static int casepath(char const *path, char *r)
 {
     size_t l = strlen(path);
-    char *p = alloca(l + 1);
+    char *p = (char *)alloca(l + 1);
     strcpy(p, path);
     size_t rl = 0;
     
@@ -144,7 +144,7 @@ static int casepathat(char const *base, char const *path, char *r)
         return 0;
 
     // Prepare to parse the relative path
-    char *p = alloca(strlen(path) + 1);
+    char *p = (char *)alloca(strlen(path) + 1);
     strcpy(p, path);
 
     int last = 0;
@@ -202,14 +202,14 @@ static int casepathat(char const *base, char const *path, char *r)
 #endif
 
 #if defined(_WIN32)
-static wchar_t* utf8_to_wide_alloc(const char* utf8)
+static wchar_t *utf8_to_wide_alloc(const char *utf8)
 {
 	if (!utf8)
 		return NULL;
 	int len = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, NULL, 0);
 	if (len <= 0)
 		return NULL;
-	wchar_t* wide = (wchar_t*)malloc(sizeof(wchar_t) * (size_t)len);
+	wchar_t *wide = (wchar_t *)malloc(sizeof(wchar_t) * (size_t)len);
 	if (!wide)
 		return NULL;
 	MultiByteToWideChar(CP_UTF8, 0, utf8, -1, wide, len);
@@ -220,8 +220,8 @@ static wchar_t* utf8_to_wide_alloc(const char* utf8)
 FILE *fcaseopen(char const *path, char const *mode)
 {
 #if defined(_WIN32)
-    wchar_t* wpath = utf8_to_wide_alloc(path);
-    wchar_t* wmode = utf8_to_wide_alloc(mode);
+    wchar_t *wpath = utf8_to_wide_alloc(path);
+    wchar_t *wmode = utf8_to_wide_alloc(mode);
     if (!wpath || !wmode)
     {
         if (wpath) free(wpath);
@@ -236,7 +236,7 @@ FILE *fcaseopen(char const *path, char const *mode)
 #if !defined(_WIN32)
     if (!f)
     {
-        char *r = alloca(strlen(path) + 3);
+        char *r = (char *)alloca(strlen(path) + 3);
         if (casepath(path, r))
         {
             f = fopen(r, mode);
@@ -250,7 +250,7 @@ FILE *fcaseopen(char const *path, char const *mode)
 int casechdir(char const *path)
 {
 #if !defined(_WIN32)
-    char *r = alloca(strlen(path) + 3);
+    char *r = (char *)alloca(strlen(path) + 3);
     if (casepath(path, r))
     {
         return chdir(r);
@@ -261,7 +261,7 @@ int casechdir(char const *path)
         return -1;
     }
 #else
-    wchar_t* wpath = utf8_to_wide_alloc(path);
+    wchar_t *wpath = utf8_to_wide_alloc(path);
     if (!wpath)
         return -1;
     int ret = _wchdir(wpath);
@@ -278,7 +278,7 @@ FILE *fcaseopenat(char const *base, char const *path, char const *mode)
 
     size_t baseLen = strlen(base);
     size_t pathLen = strlen(path);
-    char *full = alloca(baseLen + pathLen + 3);
+    char *full = (char *)alloca(baseLen + pathLen + 3);
 
     strcpy(full, base);
     size_t fl = strlen(full);
@@ -292,7 +292,7 @@ FILE *fcaseopenat(char const *base, char const *path, char const *mode)
     FILE *f = fopen(full, mode);
     if (!f)
     {
-        char *r = alloca(baseLen + pathLen + 3);
+        char *r = (char *)alloca(baseLen + pathLen + 3);
         if (casepathat(base, path, r))
         {
             f = fopen(r, mode);
@@ -305,7 +305,7 @@ FILE *fcaseopenat(char const *base, char const *path, char const *mode)
 
     size_t baseLen = strlen(base);
     size_t pathLen = strlen(path);
-    char *full = alloca(baseLen + pathLen + 3);
+    char *full = (char *)alloca(baseLen + pathLen + 3);
     strcpy(full, base);
     size_t fl = strlen(full);
     if (fl > 0 && full[fl - 1] != '/' && full[fl - 1] != '\\')
