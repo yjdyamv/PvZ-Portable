@@ -17,6 +17,7 @@
 #include "../../Sexy.TodLib/DataArray.h"
 #include "../../Sexy.TodLib/TodList.h"
 #include "DataSync.h"
+#include "misc/Buffer.h"
 #include <algorithm>
 #include <vector>
 
@@ -35,6 +36,13 @@ struct SaveFileHeaderV4
 	unsigned int	mVersion;
 	unsigned int	mPayloadSize;
 	unsigned int	mPayloadCrc;
+};
+
+struct SaveFileHeader
+{
+	unsigned int	mMagicNumber;
+	unsigned int	mBuildVersion;
+	unsigned int	mBuildDate;
 };
 
 enum SaveChunkTypeV4
@@ -1419,6 +1427,114 @@ static void SyncDataArrayPortableTLV(PortableSaveContext& theContext, DataArray<
 	}
 }
 
+// Field IDs for Board base: These IDs are part of the on-disk format and must NOT be renumbered.
+enum BoardBaseFieldId : uint32_t
+{
+	BOARD_FIELD_PAUSED = 1,
+	BOARD_FIELD_GRID_SQUARE_TYPE,
+	BOARD_FIELD_GRID_CEL_LOOK,
+	BOARD_FIELD_GRID_CEL_OFFSET,
+	BOARD_FIELD_GRID_CEL_FOG,
+	BOARD_FIELD_ENABLE_GRAVESTONES,
+	BOARD_FIELD_SPECIAL_GRAVESTONE_X,
+	BOARD_FIELD_SPECIAL_GRAVESTONE_Y,
+	BOARD_FIELD_FOG_OFFSET,
+	BOARD_FIELD_FOG_BLOWN_COUNTDOWN,
+	BOARD_FIELD_PLANT_ROW,
+	BOARD_FIELD_WAVE_ROW_GOT_LAWN_MOWERED,
+	BOARD_FIELD_BONUS_LAWN_MOWERS_REMAINING,
+	BOARD_FIELD_ICE_MIN_X,
+	BOARD_FIELD_ICE_TIMER,
+	BOARD_FIELD_ICE_PARTICLE_ID,
+	BOARD_FIELD_ROW_PICKING_ARRAY,
+	BOARD_FIELD_ZOMBIES_IN_WAVE,
+	BOARD_FIELD_ZOMBIE_ALLOWED,
+	BOARD_FIELD_SUN_COUNTDOWN,
+	BOARD_FIELD_NUM_SUNS_FALLEN,
+	BOARD_FIELD_SHAKE_COUNTER,
+	BOARD_FIELD_SHAKE_AMOUNT_X,
+	BOARD_FIELD_SHAKE_AMOUNT_Y,
+	BOARD_FIELD_BACKGROUND,
+	BOARD_FIELD_LEVEL,
+	BOARD_FIELD_SOD_POSITION,
+	BOARD_FIELD_PREV_MOUSE_X,
+	BOARD_FIELD_PREV_MOUSE_Y,
+	BOARD_FIELD_SUN_MONEY,
+	BOARD_FIELD_NUM_WAVES,
+	BOARD_FIELD_MAIN_COUNTER,
+	BOARD_FIELD_EFFECT_COUNTER,
+	BOARD_FIELD_DRAW_COUNT,
+	BOARD_FIELD_RISE_FROM_GRAVE_COUNTER,
+	BOARD_FIELD_OUT_OF_MONEY_COUNTER,
+	BOARD_FIELD_CURRENT_WAVE,
+	BOARD_FIELD_TOTAL_SPAWNED_WAVES,
+	BOARD_FIELD_TUTORIAL_STATE,
+	BOARD_FIELD_TUTORIAL_PARTICLE_ID,
+	BOARD_FIELD_TUTORIAL_TIMER,
+	BOARD_FIELD_LAST_BUNGEE_WAVE,
+	BOARD_FIELD_ZOMBIE_HEALTH_TO_NEXT_WAVE,
+	BOARD_FIELD_ZOMBIE_HEALTH_WAVE_START,
+	BOARD_FIELD_ZOMBIE_COUNTDOWN,
+	BOARD_FIELD_ZOMBIE_COUNTDOWN_START,
+	BOARD_FIELD_HUGE_WAVE_COUNTDOWN,
+	BOARD_FIELD_HELP_DISPLAYED,
+	BOARD_FIELD_HELP_INDEX,
+	BOARD_FIELD_FINAL_BOSS_KILLED,
+	BOARD_FIELD_SHOW_SHOVEL,
+	BOARD_FIELD_COIN_BANK_FADE_COUNT,
+	BOARD_FIELD_DEBUG_TEXT_MODE,
+	BOARD_FIELD_LEVEL_COMPLETE,
+	BOARD_FIELD_BOARD_FADE_OUT_COUNTER,
+	BOARD_FIELD_NEXT_SURVIVAL_STAGE_COUNTER,
+	BOARD_FIELD_SCORE_NEXT_MOWER_COUNTER,
+	BOARD_FIELD_LEVEL_AWARD_SPAWNED,
+	BOARD_FIELD_PROGRESS_METER_WIDTH,
+	BOARD_FIELD_FLAG_RAISE_COUNTER,
+	BOARD_FIELD_ICE_TRAP_COUNTER,
+	BOARD_FIELD_BOARD_RAND_SEED,
+	BOARD_FIELD_POOL_SPARKLY_PARTICLE_ID,
+	BOARD_FIELD_FWOOSH_ID,
+	BOARD_FIELD_FWOOSH_COUNTDOWN,
+	BOARD_FIELD_TIME_STOP_COUNTER,
+	BOARD_FIELD_DROPPED_FIRST_COIN,
+	BOARD_FIELD_FINAL_WAVE_SOUND_COUNTER,
+	BOARD_FIELD_COB_CANNON_CURSOR_DELAY_COUNTER,
+	BOARD_FIELD_COB_CANNON_MOUSE_X,
+	BOARD_FIELD_COB_CANNON_MOUSE_Y,
+	BOARD_FIELD_KILLED_YETI,
+	BOARD_FIELD_MUSTACHE_MODE,
+	BOARD_FIELD_SUPER_MOWER_MODE,
+	BOARD_FIELD_FUTURE_MODE,
+	BOARD_FIELD_PINATA_MODE,
+	BOARD_FIELD_DANCE_MODE,
+	BOARD_FIELD_DAISY_MODE,
+	BOARD_FIELD_SUKHBIR_MODE,
+	BOARD_FIELD_PREV_BOARD_RESULT,
+	BOARD_FIELD_TRIGGERED_LAWN_MOWERS,
+	BOARD_FIELD_PLAY_TIME_ACTIVE_LEVEL,
+	BOARD_FIELD_PLAY_TIME_INACTIVE_LEVEL,
+	BOARD_FIELD_MAX_SUN_PLANTS,
+	BOARD_FIELD_START_DRAW_TIME,
+	BOARD_FIELD_INTERVAL_DRAW_TIME,
+	BOARD_FIELD_INTERVAL_DRAW_COUNT_START,
+	BOARD_FIELD_MIN_FPS,
+	BOARD_FIELD_PRELOAD_TIME,
+	BOARD_FIELD_GAME_ID,
+	BOARD_FIELD_GRAVES_CLEARED,
+	BOARD_FIELD_PLANTS_EATEN,
+	BOARD_FIELD_PLANTS_SHOVELED,
+	BOARD_FIELD_PEA_SHOOTER_USED,
+	BOARD_FIELD_CATAPULT_PLANTS_USED,
+	BOARD_FIELD_MUSHROOM_AND_COFFEE_BEANS_ONLY,
+	BOARD_FIELD_MUSHROOMS_USED,
+	BOARD_FIELD_LEVEL_COINS_COLLECTED,
+	BOARD_FIELD_GARGANTUARS_KILLS_BY_CORN_COB,
+	BOARD_FIELD_COINS_COLLECTED,
+	BOARD_FIELD_DIAMONDS_COLLECTED,
+	BOARD_FIELD_POTTED_PLANTS_COLLECTED,
+	BOARD_FIELD_CHOCOLATE_COLLECTED
+};
+
 static void SyncBoardBasePortable(PortableSaveContext& theContext, Board* theBoard)
 {
 	if (theContext.mReading)
@@ -1439,109 +1555,109 @@ static void SyncBoardBasePortable(PortableSaveContext& theContext, Board* theBoa
 
 			switch (aFieldId)
 			{
-			case 1U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mPaused); }); break;
-			case 2U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32Array(c, &theBoard->mGridSquareType[0][0], MAX_GRID_SIZE_X * MAX_GRID_SIZE_Y); }); break;
-			case 3U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mGridCelLook[0][0], MAX_GRID_SIZE_X * MAX_GRID_SIZE_Y); }); break;
-			case 4U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mGridCelOffset[0][0][0], MAX_GRID_SIZE_X * MAX_GRID_SIZE_Y * 2); }); break;
-			case 5U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mGridCelFog[0][0], MAX_GRID_SIZE_X * (MAX_GRID_SIZE_Y + 1)); }); break;
-			case 6U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mEnableGraveStones); }); break;
-			case 7U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSpecialGraveStoneX); }); break;
-			case 8U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSpecialGraveStoneY); }); break;
-			case 9U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncFloat(theBoard->mFogOffset); }); break;
-			case 10U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFogBlownCountDown); }); break;
-			case 11U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32Array(c, &theBoard->mPlantRow[0], MAX_GRID_SIZE_Y); }); break;
-			case 12U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mWaveRowGotLawnMowered[0], MAX_GRID_SIZE_Y); }); break;
-			case 13U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mBonusLawnMowersRemaining); }); break;
-			case 14U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mIceMinX[0], MAX_GRID_SIZE_Y); }); break;
-			case 15U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mIceTimer[0], MAX_GRID_SIZE_Y); }); break;
-			case 16U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnumU32Array(c, &theBoard->mIceParticleID[0], MAX_GRID_SIZE_Y); }); break;
-			case 17U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncTodSmoothArrayList(c, &theBoard->mRowPickingArray[0], MAX_GRID_SIZE_Y); }); break;
-			case 18U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32Array(c, &theBoard->mZombiesInWave[0][0], MAX_ZOMBIE_WAVES * MAX_ZOMBIES_IN_WAVE); }); break;
-			case 19U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncBoolArray(c, &theBoard->mZombieAllowed[0], 100); }); break;
-			case 20U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSunCountDown); }); break;
-			case 21U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mNumSunsFallen); }); break;
-			case 22U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mShakeCounter); }); break;
-			case 23U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mShakeAmountX); }); break;
-			case 24U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mShakeAmountY); }); break;
-			case 25U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mBackground); }); break;
-			case 26U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mLevel); }); break;
-			case 27U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSodPosition); }); break;
-			case 28U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPrevMouseX); }); break;
-			case 29U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPrevMouseY); }); break;
-			case 30U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSunMoney); }); break;
-			case 31U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mNumWaves); }); break;
-			case 32U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mMainCounter); }); break;
-			case 33U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mEffectCounter); }); break;
-			case 34U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mDrawCount); }); break;
-			case 35U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mRiseFromGraveCounter); }); break;
-			case 36U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mOutOfMoneyCounter); }); break;
-			case 37U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCurrentWave); }); break;
-			case 38U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTotalSpawnedWaves); }); break;
-			case 39U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mTutorialState); }); break;
-			case 40U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnumU32(c, theBoard->mTutorialParticleID); }); break;
-			case 41U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTutorialTimer); }); break;
-			case 42U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mLastBungeeWave); }); break;
-			case 43U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieHealthToNextWave); }); break;
-			case 44U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieHealthWaveStart); }); break;
-			case 45U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieCountDown); }); break;
-			case 46U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieCountDownStart); }); break;
-			case 47U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mHugeWaveCountDown); }); break;
-			case 48U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncBoolArray(c, &theBoard->mHelpDisplayed[0], NUM_ADVICE_TYPES); }); break;
-			case 49U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mHelpIndex); }); break;
-			case 50U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mFinalBossKilled); }); break;
-			case 51U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mShowShovel); }); break;
-			case 52U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCoinBankFadeCount); }); break;
-			case 53U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mDebugTextMode); }); break;
-			case 54U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mLevelComplete); }); break;
-			case 55U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mBoardFadeOutCounter); }); break;
-			case 56U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mNextSurvivalStageCounter); }); break;
-			case 57U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mScoreNextMowerCounter); }); break;
-			case 58U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mLevelAwardSpawned); }); break;
-			case 59U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mProgressMeterWidth); }); break;
-			case 60U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFlagRaiseCounter); }); break;
-			case 61U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mIceTrapCounter); }); break;
-			case 62U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mBoardRandSeed); }); break;
-			case 63U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnumU32(c, theBoard->mPoolSparklyParticleID); }); break;
-			case 64U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnumU32Array(c, &theBoard->mFwooshID[0][0], MAX_GRID_SIZE_Y * 12); }); break;
-			case 65U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFwooshCountDown); }); break;
-			case 66U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTimeStopCounter); }); break;
-			case 67U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mDroppedFirstCoin); }); break;
-			case 68U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFinalWaveSoundCounter); }); break;
-			case 69U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCobCannonCursorDelayCounter); }); break;
-			case 70U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCobCannonMouseX); }); break;
-			case 71U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCobCannonMouseY); }); break;
-			case 72U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mKilledYeti); }); break;
-			case 73U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mMustacheMode); }); break;
-			case 74U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mSuperMowerMode); }); break;
-			case 75U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mFutureMode); }); break;
-			case 76U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mPinataMode); }); break;
-			case 77U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mDanceMode); }); break;
-			case 78U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mDaisyMode); }); break;
-			case 79U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mSukhbirMode); }); break;
-			case 80U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mPrevBoardResult); }); break;
-			case 81U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTriggeredLawnMowers); }); break;
-			case 82U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlayTimeActiveLevel); }); break;
-			case 83U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlayTimeInactiveLevel); }); break;
-			case 84U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mMaxSunPlants); }); break;
-			case 85U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt64(theBoard->mStartDrawTime); }); break;
-			case 86U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt64(theBoard->mIntervalDrawTime); }); break;
-			case 87U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mIntervalDrawCountStart); }); break;
-			case 88U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncFloat(theBoard->mMinFPS); }); break;
-			case 89U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPreloadTime); }); break;
-			case 90U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ int64_t aGameId = static_cast<int64_t>(theBoard->mGameID); c.SyncInt64(aGameId); if (c.mReading) theBoard->mGameID = static_cast<intptr_t>(aGameId); }); break;
-			case 91U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mGravesCleared); }); break;
-			case 92U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlantsEaten); }); break;
-			case 93U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlantsShoveled); }); break;
-			case 94U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mPeaShooterUsed); }); break;
-			case 95U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mCatapultPlantsUsed); }); break;
-			case 96U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mMushroomAndCoffeeBeansOnly); }); break;
-			case 97U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mMushroomsUsed); }); break;
-			case 98U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mLevelCoinsCollected); }); break;
-			case 99U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mGargantuarsKillsByCornCob); }); break;
-			case 100U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCoinsCollected); }); break;
-			case 101U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mDiamondsCollected); }); break;
-			case 102U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPottedPlantsCollected); }); break;
-			case 103U: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mChocolateCollected); }); break;
+			case BOARD_FIELD_PAUSED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mPaused); }); break;
+			case BOARD_FIELD_GRID_SQUARE_TYPE: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32Array(c, &theBoard->mGridSquareType[0][0], MAX_GRID_SIZE_X * MAX_GRID_SIZE_Y); }); break;
+			case BOARD_FIELD_GRID_CEL_LOOK: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mGridCelLook[0][0], MAX_GRID_SIZE_X * MAX_GRID_SIZE_Y); }); break;
+			case BOARD_FIELD_GRID_CEL_OFFSET: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mGridCelOffset[0][0][0], MAX_GRID_SIZE_X * MAX_GRID_SIZE_Y * 2); }); break;
+			case BOARD_FIELD_GRID_CEL_FOG: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mGridCelFog[0][0], MAX_GRID_SIZE_X * (MAX_GRID_SIZE_Y + 1)); }); break;
+			case BOARD_FIELD_ENABLE_GRAVESTONES: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mEnableGraveStones); }); break;
+			case BOARD_FIELD_SPECIAL_GRAVESTONE_X: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSpecialGraveStoneX); }); break;
+			case BOARD_FIELD_SPECIAL_GRAVESTONE_Y: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSpecialGraveStoneY); }); break;
+			case BOARD_FIELD_FOG_OFFSET: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncFloat(theBoard->mFogOffset); }); break;
+			case BOARD_FIELD_FOG_BLOWN_COUNTDOWN: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFogBlownCountDown); }); break;
+			case BOARD_FIELD_PLANT_ROW: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32Array(c, &theBoard->mPlantRow[0], MAX_GRID_SIZE_Y); }); break;
+			case BOARD_FIELD_WAVE_ROW_GOT_LAWN_MOWERED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mWaveRowGotLawnMowered[0], MAX_GRID_SIZE_Y); }); break;
+			case BOARD_FIELD_BONUS_LAWN_MOWERS_REMAINING: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mBonusLawnMowersRemaining); }); break;
+			case BOARD_FIELD_ICE_MIN_X: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mIceMinX[0], MAX_GRID_SIZE_Y); }); break;
+			case BOARD_FIELD_ICE_TIMER: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mIceTimer[0], MAX_GRID_SIZE_Y); }); break;
+			case BOARD_FIELD_ICE_PARTICLE_ID: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnumU32Array(c, &theBoard->mIceParticleID[0], MAX_GRID_SIZE_Y); }); break;
+			case BOARD_FIELD_ROW_PICKING_ARRAY: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncTodSmoothArrayList(c, &theBoard->mRowPickingArray[0], MAX_GRID_SIZE_Y); }); break;
+			case BOARD_FIELD_ZOMBIES_IN_WAVE: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32Array(c, &theBoard->mZombiesInWave[0][0], MAX_ZOMBIE_WAVES * MAX_ZOMBIES_IN_WAVE); }); break;
+			case BOARD_FIELD_ZOMBIE_ALLOWED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncBoolArray(c, &theBoard->mZombieAllowed[0], 100); }); break;
+			case BOARD_FIELD_SUN_COUNTDOWN: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSunCountDown); }); break;
+			case BOARD_FIELD_NUM_SUNS_FALLEN: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mNumSunsFallen); }); break;
+			case BOARD_FIELD_SHAKE_COUNTER: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mShakeCounter); }); break;
+			case BOARD_FIELD_SHAKE_AMOUNT_X: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mShakeAmountX); }); break;
+			case BOARD_FIELD_SHAKE_AMOUNT_Y: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mShakeAmountY); }); break;
+			case BOARD_FIELD_BACKGROUND: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mBackground); }); break;
+			case BOARD_FIELD_LEVEL: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mLevel); }); break;
+			case BOARD_FIELD_SOD_POSITION: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSodPosition); }); break;
+			case BOARD_FIELD_PREV_MOUSE_X: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPrevMouseX); }); break;
+			case BOARD_FIELD_PREV_MOUSE_Y: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPrevMouseY); }); break;
+			case BOARD_FIELD_SUN_MONEY: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSunMoney); }); break;
+			case BOARD_FIELD_NUM_WAVES: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mNumWaves); }); break;
+			case BOARD_FIELD_MAIN_COUNTER: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mMainCounter); }); break;
+			case BOARD_FIELD_EFFECT_COUNTER: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mEffectCounter); }); break;
+			case BOARD_FIELD_DRAW_COUNT: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mDrawCount); }); break;
+			case BOARD_FIELD_RISE_FROM_GRAVE_COUNTER: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mRiseFromGraveCounter); }); break;
+			case BOARD_FIELD_OUT_OF_MONEY_COUNTER: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mOutOfMoneyCounter); }); break;
+			case BOARD_FIELD_CURRENT_WAVE: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCurrentWave); }); break;
+			case BOARD_FIELD_TOTAL_SPAWNED_WAVES: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTotalSpawnedWaves); }); break;
+			case BOARD_FIELD_TUTORIAL_STATE: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mTutorialState); }); break;
+			case BOARD_FIELD_TUTORIAL_PARTICLE_ID: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnumU32(c, theBoard->mTutorialParticleID); }); break;
+			case BOARD_FIELD_TUTORIAL_TIMER: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTutorialTimer); }); break;
+			case BOARD_FIELD_LAST_BUNGEE_WAVE: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mLastBungeeWave); }); break;
+			case BOARD_FIELD_ZOMBIE_HEALTH_TO_NEXT_WAVE: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieHealthToNextWave); }); break;
+			case BOARD_FIELD_ZOMBIE_HEALTH_WAVE_START: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieHealthWaveStart); }); break;
+			case BOARD_FIELD_ZOMBIE_COUNTDOWN: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieCountDown); }); break;
+			case BOARD_FIELD_ZOMBIE_COUNTDOWN_START: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieCountDownStart); }); break;
+			case BOARD_FIELD_HUGE_WAVE_COUNTDOWN: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mHugeWaveCountDown); }); break;
+			case BOARD_FIELD_HELP_DISPLAYED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncBoolArray(c, &theBoard->mHelpDisplayed[0], NUM_ADVICE_TYPES); }); break;
+			case BOARD_FIELD_HELP_INDEX: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mHelpIndex); }); break;
+			case BOARD_FIELD_FINAL_BOSS_KILLED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mFinalBossKilled); }); break;
+			case BOARD_FIELD_SHOW_SHOVEL: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mShowShovel); }); break;
+			case BOARD_FIELD_COIN_BANK_FADE_COUNT: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCoinBankFadeCount); }); break;
+			case BOARD_FIELD_DEBUG_TEXT_MODE: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mDebugTextMode); }); break;
+			case BOARD_FIELD_LEVEL_COMPLETE: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mLevelComplete); }); break;
+			case BOARD_FIELD_BOARD_FADE_OUT_COUNTER: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mBoardFadeOutCounter); }); break;
+			case BOARD_FIELD_NEXT_SURVIVAL_STAGE_COUNTER: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mNextSurvivalStageCounter); }); break;
+			case BOARD_FIELD_SCORE_NEXT_MOWER_COUNTER: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mScoreNextMowerCounter); }); break;
+			case BOARD_FIELD_LEVEL_AWARD_SPAWNED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mLevelAwardSpawned); }); break;
+			case BOARD_FIELD_PROGRESS_METER_WIDTH: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mProgressMeterWidth); }); break;
+			case BOARD_FIELD_FLAG_RAISE_COUNTER: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFlagRaiseCounter); }); break;
+			case BOARD_FIELD_ICE_TRAP_COUNTER: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mIceTrapCounter); }); break;
+			case BOARD_FIELD_BOARD_RAND_SEED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mBoardRandSeed); }); break;
+			case BOARD_FIELD_POOL_SPARKLY_PARTICLE_ID: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnumU32(c, theBoard->mPoolSparklyParticleID); }); break;
+			case BOARD_FIELD_FWOOSH_ID: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnumU32Array(c, &theBoard->mFwooshID[0][0], MAX_GRID_SIZE_Y * 12); }); break;
+			case BOARD_FIELD_FWOOSH_COUNTDOWN: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFwooshCountDown); }); break;
+			case BOARD_FIELD_TIME_STOP_COUNTER: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTimeStopCounter); }); break;
+			case BOARD_FIELD_DROPPED_FIRST_COIN: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mDroppedFirstCoin); }); break;
+			case BOARD_FIELD_FINAL_WAVE_SOUND_COUNTER: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFinalWaveSoundCounter); }); break;
+			case BOARD_FIELD_COB_CANNON_CURSOR_DELAY_COUNTER: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCobCannonCursorDelayCounter); }); break;
+			case BOARD_FIELD_COB_CANNON_MOUSE_X: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCobCannonMouseX); }); break;
+			case BOARD_FIELD_COB_CANNON_MOUSE_Y: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCobCannonMouseY); }); break;
+			case BOARD_FIELD_KILLED_YETI: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mKilledYeti); }); break;
+			case BOARD_FIELD_MUSTACHE_MODE: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mMustacheMode); }); break;
+			case BOARD_FIELD_SUPER_MOWER_MODE: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mSuperMowerMode); }); break;
+			case BOARD_FIELD_FUTURE_MODE: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mFutureMode); }); break;
+			case BOARD_FIELD_PINATA_MODE: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mPinataMode); }); break;
+			case BOARD_FIELD_DANCE_MODE: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mDanceMode); }); break;
+			case BOARD_FIELD_DAISY_MODE: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mDaisyMode); }); break;
+			case BOARD_FIELD_SUKHBIR_MODE: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mSukhbirMode); }); break;
+			case BOARD_FIELD_PREV_BOARD_RESULT: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mPrevBoardResult); }); break;
+			case BOARD_FIELD_TRIGGERED_LAWN_MOWERS: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTriggeredLawnMowers); }); break;
+			case BOARD_FIELD_PLAY_TIME_ACTIVE_LEVEL: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlayTimeActiveLevel); }); break;
+			case BOARD_FIELD_PLAY_TIME_INACTIVE_LEVEL: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlayTimeInactiveLevel); }); break;
+			case BOARD_FIELD_MAX_SUN_PLANTS: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mMaxSunPlants); }); break;
+			case BOARD_FIELD_START_DRAW_TIME: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt64(theBoard->mStartDrawTime); }); break;
+			case BOARD_FIELD_INTERVAL_DRAW_TIME: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt64(theBoard->mIntervalDrawTime); }); break;
+			case BOARD_FIELD_INTERVAL_DRAW_COUNT_START: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mIntervalDrawCountStart); }); break;
+			case BOARD_FIELD_MIN_FPS: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncFloat(theBoard->mMinFPS); }); break;
+			case BOARD_FIELD_PRELOAD_TIME: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPreloadTime); }); break;
+			case BOARD_FIELD_GAME_ID: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ int64_t aGameId = static_cast<int64_t>(theBoard->mGameID); c.SyncInt64(aGameId); if (c.mReading) theBoard->mGameID = static_cast<intptr_t>(aGameId); }); break;
+			case BOARD_FIELD_GRAVES_CLEARED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mGravesCleared); }); break;
+			case BOARD_FIELD_PLANTS_EATEN: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlantsEaten); }); break;
+			case BOARD_FIELD_PLANTS_SHOVELED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlantsShoveled); }); break;
+			case BOARD_FIELD_PEA_SHOOTER_USED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mPeaShooterUsed); }); break;
+			case BOARD_FIELD_CATAPULT_PLANTS_USED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mCatapultPlantsUsed); }); break;
+			case BOARD_FIELD_MUSHROOM_AND_COFFEE_BEANS_ONLY: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mMushroomAndCoffeeBeansOnly); }); break;
+			case BOARD_FIELD_MUSHROOMS_USED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mMushroomsUsed); }); break;
+			case BOARD_FIELD_LEVEL_COINS_COLLECTED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mLevelCoinsCollected); }); break;
+			case BOARD_FIELD_GARGANTUARS_KILLS_BY_CORN_COB: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mGargantuarsKillsByCornCob); }); break;
+			case BOARD_FIELD_COINS_COLLECTED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCoinsCollected); }); break;
+			case BOARD_FIELD_DIAMONDS_COLLECTED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mDiamondsCollected); }); break;
+			case BOARD_FIELD_POTTED_PLANTS_COLLECTED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPottedPlantsCollected); }); break;
+			case BOARD_FIELD_CHOCOLATE_COLLECTED: ApplyFieldWithSync(aFieldData, aFieldSize, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mChocolateCollected); }); break;
 			default: break;
 			}
 		}
@@ -1549,109 +1665,109 @@ static void SyncBoardBasePortable(PortableSaveContext& theContext, Board* theBoa
 	else
 	{
 		std::vector<unsigned char> aBlob;
-		AppendFieldWithSync(aBlob, 1U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mPaused); });
-		AppendFieldWithSync(aBlob, 2U, [&](PortableSaveContext& c){ SyncEnum32Array(c, &theBoard->mGridSquareType[0][0], MAX_GRID_SIZE_X * MAX_GRID_SIZE_Y); });
-		AppendFieldWithSync(aBlob, 3U, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mGridCelLook[0][0], MAX_GRID_SIZE_X * MAX_GRID_SIZE_Y); });
-		AppendFieldWithSync(aBlob, 4U, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mGridCelOffset[0][0][0], MAX_GRID_SIZE_X * MAX_GRID_SIZE_Y * 2); });
-		AppendFieldWithSync(aBlob, 5U, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mGridCelFog[0][0], MAX_GRID_SIZE_X * (MAX_GRID_SIZE_Y + 1)); });
-		AppendFieldWithSync(aBlob, 6U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mEnableGraveStones); });
-		AppendFieldWithSync(aBlob, 7U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSpecialGraveStoneX); });
-		AppendFieldWithSync(aBlob, 8U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSpecialGraveStoneY); });
-		AppendFieldWithSync(aBlob, 9U, [&](PortableSaveContext& c){ c.SyncFloat(theBoard->mFogOffset); });
-		AppendFieldWithSync(aBlob, 10U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFogBlownCountDown); });
-		AppendFieldWithSync(aBlob, 11U, [&](PortableSaveContext& c){ SyncEnum32Array(c, &theBoard->mPlantRow[0], MAX_GRID_SIZE_Y); });
-		AppendFieldWithSync(aBlob, 12U, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mWaveRowGotLawnMowered[0], MAX_GRID_SIZE_Y); });
-		AppendFieldWithSync(aBlob, 13U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mBonusLawnMowersRemaining); });
-		AppendFieldWithSync(aBlob, 14U, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mIceMinX[0], MAX_GRID_SIZE_Y); });
-		AppendFieldWithSync(aBlob, 15U, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mIceTimer[0], MAX_GRID_SIZE_Y); });
-		AppendFieldWithSync(aBlob, 16U, [&](PortableSaveContext& c){ SyncEnumU32Array(c, &theBoard->mIceParticleID[0], MAX_GRID_SIZE_Y); });
-		AppendFieldWithSync(aBlob, 17U, [&](PortableSaveContext& c){ SyncTodSmoothArrayList(c, &theBoard->mRowPickingArray[0], MAX_GRID_SIZE_Y); });
-		AppendFieldWithSync(aBlob, 18U, [&](PortableSaveContext& c){ SyncEnum32Array(c, &theBoard->mZombiesInWave[0][0], MAX_ZOMBIE_WAVES * MAX_ZOMBIES_IN_WAVE); });
-		AppendFieldWithSync(aBlob, 19U, [&](PortableSaveContext& c){ SyncBoolArray(c, &theBoard->mZombieAllowed[0], 100); });
-		AppendFieldWithSync(aBlob, 20U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSunCountDown); });
-		AppendFieldWithSync(aBlob, 21U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mNumSunsFallen); });
-		AppendFieldWithSync(aBlob, 22U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mShakeCounter); });
-		AppendFieldWithSync(aBlob, 23U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mShakeAmountX); });
-		AppendFieldWithSync(aBlob, 24U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mShakeAmountY); });
-		AppendFieldWithSync(aBlob, 25U, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mBackground); });
-		AppendFieldWithSync(aBlob, 26U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mLevel); });
-		AppendFieldWithSync(aBlob, 27U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSodPosition); });
-		AppendFieldWithSync(aBlob, 28U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPrevMouseX); });
-		AppendFieldWithSync(aBlob, 29U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPrevMouseY); });
-		AppendFieldWithSync(aBlob, 30U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSunMoney); });
-		AppendFieldWithSync(aBlob, 31U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mNumWaves); });
-		AppendFieldWithSync(aBlob, 32U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mMainCounter); });
-		AppendFieldWithSync(aBlob, 33U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mEffectCounter); });
-		AppendFieldWithSync(aBlob, 34U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mDrawCount); });
-		AppendFieldWithSync(aBlob, 35U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mRiseFromGraveCounter); });
-		AppendFieldWithSync(aBlob, 36U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mOutOfMoneyCounter); });
-		AppendFieldWithSync(aBlob, 37U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCurrentWave); });
-		AppendFieldWithSync(aBlob, 38U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTotalSpawnedWaves); });
-		AppendFieldWithSync(aBlob, 39U, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mTutorialState); });
-		AppendFieldWithSync(aBlob, 40U, [&](PortableSaveContext& c){ SyncEnumU32(c, theBoard->mTutorialParticleID); });
-		AppendFieldWithSync(aBlob, 41U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTutorialTimer); });
-		AppendFieldWithSync(aBlob, 42U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mLastBungeeWave); });
-		AppendFieldWithSync(aBlob, 43U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieHealthToNextWave); });
-		AppendFieldWithSync(aBlob, 44U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieHealthWaveStart); });
-		AppendFieldWithSync(aBlob, 45U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieCountDown); });
-		AppendFieldWithSync(aBlob, 46U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieCountDownStart); });
-		AppendFieldWithSync(aBlob, 47U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mHugeWaveCountDown); });
-		AppendFieldWithSync(aBlob, 48U, [&](PortableSaveContext& c){ SyncBoolArray(c, &theBoard->mHelpDisplayed[0], NUM_ADVICE_TYPES); });
-		AppendFieldWithSync(aBlob, 49U, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mHelpIndex); });
-		AppendFieldWithSync(aBlob, 50U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mFinalBossKilled); });
-		AppendFieldWithSync(aBlob, 51U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mShowShovel); });
-		AppendFieldWithSync(aBlob, 52U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCoinBankFadeCount); });
-		AppendFieldWithSync(aBlob, 53U, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mDebugTextMode); });
-		AppendFieldWithSync(aBlob, 54U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mLevelComplete); });
-		AppendFieldWithSync(aBlob, 55U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mBoardFadeOutCounter); });
-		AppendFieldWithSync(aBlob, 56U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mNextSurvivalStageCounter); });
-		AppendFieldWithSync(aBlob, 57U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mScoreNextMowerCounter); });
-		AppendFieldWithSync(aBlob, 58U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mLevelAwardSpawned); });
-		AppendFieldWithSync(aBlob, 59U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mProgressMeterWidth); });
-		AppendFieldWithSync(aBlob, 60U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFlagRaiseCounter); });
-		AppendFieldWithSync(aBlob, 61U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mIceTrapCounter); });
-		AppendFieldWithSync(aBlob, 62U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mBoardRandSeed); });
-		AppendFieldWithSync(aBlob, 63U, [&](PortableSaveContext& c){ SyncEnumU32(c, theBoard->mPoolSparklyParticleID); });
-		AppendFieldWithSync(aBlob, 64U, [&](PortableSaveContext& c){ SyncEnumU32Array(c, &theBoard->mFwooshID[0][0], MAX_GRID_SIZE_Y * 12); });
-		AppendFieldWithSync(aBlob, 65U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFwooshCountDown); });
-		AppendFieldWithSync(aBlob, 66U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTimeStopCounter); });
-		AppendFieldWithSync(aBlob, 67U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mDroppedFirstCoin); });
-		AppendFieldWithSync(aBlob, 68U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFinalWaveSoundCounter); });
-		AppendFieldWithSync(aBlob, 69U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCobCannonCursorDelayCounter); });
-		AppendFieldWithSync(aBlob, 70U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCobCannonMouseX); });
-		AppendFieldWithSync(aBlob, 71U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCobCannonMouseY); });
-		AppendFieldWithSync(aBlob, 72U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mKilledYeti); });
-		AppendFieldWithSync(aBlob, 73U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mMustacheMode); });
-		AppendFieldWithSync(aBlob, 74U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mSuperMowerMode); });
-		AppendFieldWithSync(aBlob, 75U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mFutureMode); });
-		AppendFieldWithSync(aBlob, 76U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mPinataMode); });
-		AppendFieldWithSync(aBlob, 77U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mDanceMode); });
-		AppendFieldWithSync(aBlob, 78U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mDaisyMode); });
-		AppendFieldWithSync(aBlob, 79U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mSukhbirMode); });
-		AppendFieldWithSync(aBlob, 80U, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mPrevBoardResult); });
-		AppendFieldWithSync(aBlob, 81U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTriggeredLawnMowers); });
-		AppendFieldWithSync(aBlob, 82U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlayTimeActiveLevel); });
-		AppendFieldWithSync(aBlob, 83U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlayTimeInactiveLevel); });
-		AppendFieldWithSync(aBlob, 84U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mMaxSunPlants); });
-		AppendFieldWithSync(aBlob, 85U, [&](PortableSaveContext& c){ c.SyncInt64(theBoard->mStartDrawTime); });
-		AppendFieldWithSync(aBlob, 86U, [&](PortableSaveContext& c){ c.SyncInt64(theBoard->mIntervalDrawTime); });
-		AppendFieldWithSync(aBlob, 87U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mIntervalDrawCountStart); });
-		AppendFieldWithSync(aBlob, 88U, [&](PortableSaveContext& c){ c.SyncFloat(theBoard->mMinFPS); });
-		AppendFieldWithSync(aBlob, 89U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPreloadTime); });
-		AppendFieldWithSync(aBlob, 90U, [&](PortableSaveContext& c){ int64_t aGameId = static_cast<int64_t>(theBoard->mGameID); c.SyncInt64(aGameId); if (c.mReading) theBoard->mGameID = static_cast<intptr_t>(aGameId); });
-		AppendFieldWithSync(aBlob, 91U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mGravesCleared); });
-		AppendFieldWithSync(aBlob, 92U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlantsEaten); });
-		AppendFieldWithSync(aBlob, 93U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlantsShoveled); });
-		AppendFieldWithSync(aBlob, 94U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mPeaShooterUsed); });
-		AppendFieldWithSync(aBlob, 95U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mCatapultPlantsUsed); });
-		AppendFieldWithSync(aBlob, 96U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mMushroomAndCoffeeBeansOnly); });
-		AppendFieldWithSync(aBlob, 97U, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mMushroomsUsed); });
-		AppendFieldWithSync(aBlob, 98U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mLevelCoinsCollected); });
-		AppendFieldWithSync(aBlob, 99U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mGargantuarsKillsByCornCob); });
-		AppendFieldWithSync(aBlob, 100U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCoinsCollected); });
-		AppendFieldWithSync(aBlob, 101U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mDiamondsCollected); });
-		AppendFieldWithSync(aBlob, 102U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPottedPlantsCollected); });
-		AppendFieldWithSync(aBlob, 103U, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mChocolateCollected); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_PAUSED, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mPaused); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_GRID_SQUARE_TYPE, [&](PortableSaveContext& c){ SyncEnum32Array(c, &theBoard->mGridSquareType[0][0], MAX_GRID_SIZE_X * MAX_GRID_SIZE_Y); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_GRID_CEL_LOOK, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mGridCelLook[0][0], MAX_GRID_SIZE_X * MAX_GRID_SIZE_Y); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_GRID_CEL_OFFSET, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mGridCelOffset[0][0][0], MAX_GRID_SIZE_X * MAX_GRID_SIZE_Y * 2); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_GRID_CEL_FOG, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mGridCelFog[0][0], MAX_GRID_SIZE_X * (MAX_GRID_SIZE_Y + 1)); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_ENABLE_GRAVESTONES, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mEnableGraveStones); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_SPECIAL_GRAVESTONE_X, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSpecialGraveStoneX); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_SPECIAL_GRAVESTONE_Y, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSpecialGraveStoneY); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_FOG_OFFSET, [&](PortableSaveContext& c){ c.SyncFloat(theBoard->mFogOffset); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_FOG_BLOWN_COUNTDOWN, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFogBlownCountDown); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_PLANT_ROW, [&](PortableSaveContext& c){ SyncEnum32Array(c, &theBoard->mPlantRow[0], MAX_GRID_SIZE_Y); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_WAVE_ROW_GOT_LAWN_MOWERED, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mWaveRowGotLawnMowered[0], MAX_GRID_SIZE_Y); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_BONUS_LAWN_MOWERS_REMAINING, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mBonusLawnMowersRemaining); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_ICE_MIN_X, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mIceMinX[0], MAX_GRID_SIZE_Y); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_ICE_TIMER, [&](PortableSaveContext& c){ SyncInt32Array(c, &theBoard->mIceTimer[0], MAX_GRID_SIZE_Y); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_ICE_PARTICLE_ID, [&](PortableSaveContext& c){ SyncEnumU32Array(c, &theBoard->mIceParticleID[0], MAX_GRID_SIZE_Y); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_ROW_PICKING_ARRAY, [&](PortableSaveContext& c){ SyncTodSmoothArrayList(c, &theBoard->mRowPickingArray[0], MAX_GRID_SIZE_Y); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_ZOMBIES_IN_WAVE, [&](PortableSaveContext& c){ SyncEnum32Array(c, &theBoard->mZombiesInWave[0][0], MAX_ZOMBIE_WAVES * MAX_ZOMBIES_IN_WAVE); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_ZOMBIE_ALLOWED, [&](PortableSaveContext& c){ SyncBoolArray(c, &theBoard->mZombieAllowed[0], 100); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_SUN_COUNTDOWN, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSunCountDown); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_NUM_SUNS_FALLEN, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mNumSunsFallen); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_SHAKE_COUNTER, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mShakeCounter); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_SHAKE_AMOUNT_X, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mShakeAmountX); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_SHAKE_AMOUNT_Y, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mShakeAmountY); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_BACKGROUND, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mBackground); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_LEVEL, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mLevel); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_SOD_POSITION, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSodPosition); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_PREV_MOUSE_X, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPrevMouseX); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_PREV_MOUSE_Y, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPrevMouseY); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_SUN_MONEY, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mSunMoney); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_NUM_WAVES, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mNumWaves); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_MAIN_COUNTER, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mMainCounter); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_EFFECT_COUNTER, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mEffectCounter); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_DRAW_COUNT, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mDrawCount); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_RISE_FROM_GRAVE_COUNTER, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mRiseFromGraveCounter); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_OUT_OF_MONEY_COUNTER, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mOutOfMoneyCounter); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_CURRENT_WAVE, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCurrentWave); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_TOTAL_SPAWNED_WAVES, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTotalSpawnedWaves); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_TUTORIAL_STATE, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mTutorialState); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_TUTORIAL_PARTICLE_ID, [&](PortableSaveContext& c){ SyncEnumU32(c, theBoard->mTutorialParticleID); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_TUTORIAL_TIMER, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTutorialTimer); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_LAST_BUNGEE_WAVE, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mLastBungeeWave); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_ZOMBIE_HEALTH_TO_NEXT_WAVE, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieHealthToNextWave); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_ZOMBIE_HEALTH_WAVE_START, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieHealthWaveStart); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_ZOMBIE_COUNTDOWN, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieCountDown); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_ZOMBIE_COUNTDOWN_START, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mZombieCountDownStart); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_HUGE_WAVE_COUNTDOWN, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mHugeWaveCountDown); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_HELP_DISPLAYED, [&](PortableSaveContext& c){ SyncBoolArray(c, &theBoard->mHelpDisplayed[0], NUM_ADVICE_TYPES); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_HELP_INDEX, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mHelpIndex); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_FINAL_BOSS_KILLED, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mFinalBossKilled); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_SHOW_SHOVEL, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mShowShovel); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_COIN_BANK_FADE_COUNT, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCoinBankFadeCount); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_DEBUG_TEXT_MODE, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mDebugTextMode); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_LEVEL_COMPLETE, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mLevelComplete); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_BOARD_FADE_OUT_COUNTER, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mBoardFadeOutCounter); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_NEXT_SURVIVAL_STAGE_COUNTER, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mNextSurvivalStageCounter); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_SCORE_NEXT_MOWER_COUNTER, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mScoreNextMowerCounter); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_LEVEL_AWARD_SPAWNED, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mLevelAwardSpawned); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_PROGRESS_METER_WIDTH, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mProgressMeterWidth); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_FLAG_RAISE_COUNTER, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFlagRaiseCounter); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_ICE_TRAP_COUNTER, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mIceTrapCounter); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_BOARD_RAND_SEED, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mBoardRandSeed); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_POOL_SPARKLY_PARTICLE_ID, [&](PortableSaveContext& c){ SyncEnumU32(c, theBoard->mPoolSparklyParticleID); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_FWOOSH_ID, [&](PortableSaveContext& c){ SyncEnumU32Array(c, &theBoard->mFwooshID[0][0], MAX_GRID_SIZE_Y * 12); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_FWOOSH_COUNTDOWN, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFwooshCountDown); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_TIME_STOP_COUNTER, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTimeStopCounter); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_DROPPED_FIRST_COIN, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mDroppedFirstCoin); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_FINAL_WAVE_SOUND_COUNTER, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mFinalWaveSoundCounter); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_COB_CANNON_CURSOR_DELAY_COUNTER, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCobCannonCursorDelayCounter); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_COB_CANNON_MOUSE_X, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCobCannonMouseX); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_COB_CANNON_MOUSE_Y, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCobCannonMouseY); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_KILLED_YETI, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mKilledYeti); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_MUSTACHE_MODE, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mMustacheMode); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_SUPER_MOWER_MODE, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mSuperMowerMode); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_FUTURE_MODE, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mFutureMode); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_PINATA_MODE, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mPinataMode); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_DANCE_MODE, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mDanceMode); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_DAISY_MODE, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mDaisyMode); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_SUKHBIR_MODE, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mSukhbirMode); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_PREV_BOARD_RESULT, [&](PortableSaveContext& c){ SyncEnum32(c, theBoard->mPrevBoardResult); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_TRIGGERED_LAWN_MOWERS, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mTriggeredLawnMowers); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_PLAY_TIME_ACTIVE_LEVEL, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlayTimeActiveLevel); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_PLAY_TIME_INACTIVE_LEVEL, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlayTimeInactiveLevel); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_MAX_SUN_PLANTS, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mMaxSunPlants); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_START_DRAW_TIME, [&](PortableSaveContext& c){ c.SyncInt64(theBoard->mStartDrawTime); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_INTERVAL_DRAW_TIME, [&](PortableSaveContext& c){ c.SyncInt64(theBoard->mIntervalDrawTime); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_INTERVAL_DRAW_COUNT_START, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mIntervalDrawCountStart); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_MIN_FPS, [&](PortableSaveContext& c){ c.SyncFloat(theBoard->mMinFPS); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_PRELOAD_TIME, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPreloadTime); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_GAME_ID, [&](PortableSaveContext& c){ int64_t aGameId = static_cast<int64_t>(theBoard->mGameID); c.SyncInt64(aGameId); if (c.mReading) theBoard->mGameID = static_cast<intptr_t>(aGameId); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_GRAVES_CLEARED, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mGravesCleared); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_PLANTS_EATEN, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlantsEaten); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_PLANTS_SHOVELED, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPlantsShoveled); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_PEA_SHOOTER_USED, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mPeaShooterUsed); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_CATAPULT_PLANTS_USED, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mCatapultPlantsUsed); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_MUSHROOM_AND_COFFEE_BEANS_ONLY, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mMushroomAndCoffeeBeansOnly); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_MUSHROOMS_USED, [&](PortableSaveContext& c){ c.SyncBool(theBoard->mMushroomsUsed); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_LEVEL_COINS_COLLECTED, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mLevelCoinsCollected); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_GARGANTUARS_KILLS_BY_CORN_COB, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mGargantuarsKillsByCornCob); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_COINS_COLLECTED, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mCoinsCollected); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_DIAMONDS_COLLECTED, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mDiamondsCollected); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_POTTED_PLANTS_COLLECTED, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mPottedPlantsCollected); });
+		AppendFieldWithSync(aBlob, BOARD_FIELD_CHOCOLATE_COLLECTED, [&](PortableSaveContext& c){ c.SyncInt32(theBoard->mChocolateCollected); });
 		WriteTLVBlob(theContext, aBlob);
 	}
 }
@@ -2267,6 +2383,175 @@ static bool ReadChunkV4(uint32_t theChunkType, const unsigned char* theData, siz
 	return aApplied;
 }
 
+//0x481CE0
+static void FixBoardAfterLoad(Board* theBoard)
+{
+	{
+		Plant* aPlant = nullptr;
+		while (theBoard->mPlants.IterateNext(aPlant))
+		{
+			aPlant->mApp = theBoard->mApp;
+			aPlant->mBoard = theBoard;
+		}
+	}
+	{
+		Zombie* aZombie = nullptr;
+		while (theBoard->mZombies.IterateNext(aZombie))
+		{
+			aZombie->mApp = theBoard->mApp;
+			aZombie->mBoard = theBoard;
+
+			switch (aZombie->mZombieType)
+			{
+			case ZombieType::ZOMBIE_GARGANTUAR:
+			case ZombieType::ZOMBIE_REDEYE_GARGANTUAR:
+			{
+				Reanimation* aBodyReanim = theBoard->mApp->ReanimationGet(aZombie->mBodyReanimID);
+				if (aBodyReanim)
+				{
+					int aDamageIndex = aZombie->GetBodyDamageIndex();
+					if (aDamageIndex >= 1)
+					{
+						aBodyReanim->SetImageOverride("Zombie_gargantua_body1", IMAGE_REANIM_ZOMBIE_GARGANTUAR_BODY1_2);
+						aBodyReanim->SetImageOverride("Zombie_gargantuar_outerarm_lower", IMAGE_REANIM_ZOMBIE_GARGANTUAR_OUTERARM_LOWER2);
+					}
+					if (aDamageIndex >= 2)
+					{
+						aBodyReanim->SetImageOverride("Zombie_gargantua_body1", IMAGE_REANIM_ZOMBIE_GARGANTUAR_BODY1_3);
+						aBodyReanim->SetImageOverride("Zombie_gargantuar_outerleg_foot", IMAGE_REANIM_ZOMBIE_GARGANTUAR_FOOT2);
+					}
+
+					if (aZombie->mZombieType == ZombieType::ZOMBIE_REDEYE_GARGANTUAR)
+					{
+						if (aDamageIndex >= 2)
+							aBodyReanim->SetImageOverride("anim_head1", IMAGE_REANIM_ZOMBIE_GARGANTUAR_HEAD2_REDEYE);
+						else
+							aBodyReanim->SetImageOverride("anim_head1", IMAGE_REANIM_ZOMBIE_GARGANTUAR_HEAD_REDEYE);
+					}
+					else if (aDamageIndex >= 2)
+					{
+						aBodyReanim->SetImageOverride("anim_head1", IMAGE_REANIM_ZOMBIE_GARGANTUAR_HEAD2);
+					}
+				}
+				break;
+			}
+
+			case ZombieType::ZOMBIE_ZAMBONI:
+			{
+				Reanimation* aBodyReanim = theBoard->mApp->ReanimationGet(aZombie->mBodyReanimID);
+				if (aBodyReanim)
+				{
+					int aDamageIndex = aZombie->GetBodyDamageIndex();
+					if (aDamageIndex >= 1)
+					{
+						aBodyReanim->SetImageOverride("Zombie_zamboni_1", IMAGE_REANIM_ZOMBIE_ZAMBONI_1_DAMAGE1);
+						aBodyReanim->SetImageOverride("Zombie_zamboni_2", IMAGE_REANIM_ZOMBIE_ZAMBONI_2_DAMAGE1);
+					}
+					if (aDamageIndex >= 2)
+					{
+						aBodyReanim->SetImageOverride("Zombie_zamboni_1", IMAGE_REANIM_ZOMBIE_ZAMBONI_1_DAMAGE2);
+						aBodyReanim->SetImageOverride("Zombie_zamboni_2", IMAGE_REANIM_ZOMBIE_ZAMBONI_2_DAMAGE2);
+					}
+				}
+				break;
+			}
+
+			case ZombieType::ZOMBIE_CATAPULT:
+			{
+				Reanimation* aBodyReanim = theBoard->mApp->ReanimationGet(aZombie->mBodyReanimID);
+				if (aBodyReanim)
+				{
+					int aDamageIndex = aZombie->GetBodyDamageIndex();
+					if (aDamageIndex >= 1)
+					{
+						aBodyReanim->SetImageOverride("Zombie_catapult_siding", IMAGE_REANIM_ZOMBIE_CATAPULT_SIDING_DAMAGE);
+					}
+				}
+				break;
+			}
+
+			case ZombieType::ZOMBIE_BOSS:
+			{
+				Reanimation* aBodyReanim = theBoard->mApp->ReanimationGet(aZombie->mBodyReanimID);
+				if (aBodyReanim)
+				{
+					int aDamageIndex = aZombie->GetBodyDamageIndex();
+					if (aDamageIndex >= 1)
+					{
+						aBodyReanim->SetImageOverride("Boss_head", IMAGE_REANIM_ZOMBIE_BOSS_HEAD_DAMAGE1);
+						aBodyReanim->SetImageOverride("Boss_jaw", IMAGE_REANIM_ZOMBIE_BOSS_JAW_DAMAGE1);
+						aBodyReanim->SetImageOverride("Boss_outerarm_hand", IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_HAND_DAMAGE1);
+						aBodyReanim->SetImageOverride("Boss_outerarm_thumb2", IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_THUMB_DAMAGE1);
+						aBodyReanim->SetImageOverride("Boss_innerleg_foot", IMAGE_REANIM_ZOMBIE_BOSS_FOOT_DAMAGE1);
+					}
+					if (aDamageIndex >= 2)
+					{
+						aBodyReanim->SetImageOverride("Boss_head", IMAGE_REANIM_ZOMBIE_BOSS_HEAD_DAMAGE2);
+						aBodyReanim->SetImageOverride("Boss_jaw", IMAGE_REANIM_ZOMBIE_BOSS_JAW_DAMAGE2);
+						aBodyReanim->SetImageOverride("Boss_outerarm_hand", IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_HAND_DAMAGE2);
+						aBodyReanim->SetImageOverride("Boss_outerarm_thumb2", IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_THUMB_DAMAGE2);
+						aBodyReanim->SetImageOverride("Boss_outerleg_foot", IMAGE_REANIM_ZOMBIE_BOSS_FOOT_DAMAGE2);
+					}
+				}
+				break;
+			}
+
+			default:
+				break;
+			}
+		}
+	}
+	{
+		Projectile* aProjectile = nullptr;
+		while (theBoard->mProjectiles.IterateNext(aProjectile))
+		{
+			aProjectile->mApp = theBoard->mApp;
+			aProjectile->mBoard = theBoard;
+		}
+	}
+	{
+		Coin* aCoin = nullptr;
+		while (theBoard->mCoins.IterateNext(aCoin))
+		{
+			aCoin->mApp = theBoard->mApp;
+			aCoin->mBoard = theBoard;
+		}
+	}
+	{
+		LawnMower* aLawnMower = nullptr;
+		while (theBoard->mLawnMowers.IterateNext(aLawnMower))
+		{
+			aLawnMower->mApp = theBoard->mApp;
+			aLawnMower->mBoard = theBoard;
+		}
+	}
+	{
+		GridItem* aGridItem = nullptr;
+		while (theBoard->mGridItems.IterateNext(aGridItem))
+		{
+			aGridItem->mApp = theBoard->mApp;
+			aGridItem->mBoard = theBoard;
+		}
+	}
+
+	theBoard->mAdvice->mApp = theBoard->mApp;
+	theBoard->mCursorObject->mApp = theBoard->mApp;
+	theBoard->mCursorObject->mBoard = theBoard;
+	theBoard->mCursorPreview->mApp = theBoard->mApp;
+	theBoard->mCursorPreview->mBoard = theBoard;
+	theBoard->mSeedBank->mApp = theBoard->mApp;
+	theBoard->mSeedBank->mBoard = theBoard;
+	for (int i = 0; i < SEEDBANK_MAX; i++)
+	{
+		theBoard->mSeedBank->mSeedPackets[i].mApp = theBoard->mApp;
+		theBoard->mSeedBank->mSeedPackets[i].mBoard = theBoard;
+	}
+	theBoard->mChallenge->mApp = theBoard->mApp;
+	theBoard->mChallenge->mBoard = theBoard;
+	theBoard->mApp->mMusic->mApp = theBoard->mApp;
+	theBoard->mApp->mMusic->mMusicInterface = theBoard->mApp->mMusicInterface;
+}
+
 static bool LawnLoadGameV4(Board* theBoard, const std::string& theFilePath)
 {
 	Buffer aBuffer;
@@ -2317,6 +2602,25 @@ static bool LawnLoadGameV4(Board* theBoard, const std::string& theFilePath)
 	theBoard->mApp->mGameScene = GameScenes::SCENE_PLAYING;
 	return true;
 }
+
+// Legacy mid-level save support
+class SaveGameContext
+{
+public:
+	Sexy::Buffer	mBuffer;            //+0x0
+	bool			mFailed;            //+0x20
+	bool			mReading;           //+0x21
+
+public:
+	inline int		ByteLeftToRead() { return (mBuffer.mDataBitSize - mBuffer.mReadBitPos + 7) / 8; }
+	void			SyncBytes(void* theDest, int theReadSize);
+	void			SyncInt(int& theInt);
+	inline void		SyncUint(unsigned int& theInt) { SyncInt((signed int&)theInt); }
+	void			SyncReanimationDef(ReanimatorDefinition*& theDefinition);
+	void			SyncParticleDef(TodParticleDefinition*& theDefinition);
+	void			SyncTrailDef(TrailDefinition*& theDefinition);
+	void			SyncImage(Image*& theImage);
+};
 
 //0x4813D0
 void SaveGameContext::SyncBytes(void* theDest, int theReadSize)
@@ -2517,7 +2821,7 @@ void SaveGameContext::SyncImage(Image*& theImage)
 }
 
 //0x481710
-void SyncDataIDList(TodList<unsigned int>* theDataIDList, SaveGameContext& theContext, TodAllocator* theAllocator)
+static void SyncDataIDList(TodList<unsigned int>* theDataIDList, SaveGameContext& theContext, TodAllocator* theAllocator)
 {
 	try
 	{
@@ -2558,7 +2862,7 @@ void SyncDataIDList(TodList<unsigned int>* theDataIDList, SaveGameContext& theCo
 }
 
 //0x4817C0
-void SyncParticleEmitter(TodParticleSystem* theParticleSystem, TodParticleEmitter* theParticleEmitter, SaveGameContext& theContext)
+static void SyncParticleEmitter(TodParticleSystem* theParticleSystem, TodParticleEmitter* theParticleEmitter, SaveGameContext& theContext)
 {
 	int aEmitterDefIndex = 0;
 	if (theContext.mReading)
@@ -2587,7 +2891,7 @@ void SyncParticleEmitter(TodParticleSystem* theParticleSystem, TodParticleEmitte
 }
 
 //0x481880
-void SyncParticleSystem(Board* theBoard, TodParticleSystem* theParticleSystem, SaveGameContext& theContext)
+static void SyncParticleSystem(Board* theBoard, TodParticleSystem* theParticleSystem, SaveGameContext& theContext)
 {
 	theContext.SyncParticleDef(theParticleSystem->mParticleDef);
 	if (theContext.mReading)
@@ -2604,7 +2908,7 @@ void SyncParticleSystem(Board* theBoard, TodParticleSystem* theParticleSystem, S
 }
 
 //0x4818F0
-void SyncReanimation(Board* theBoard, Reanimation* theReanimation, SaveGameContext& theContext)
+static void SyncReanimation(Board* theBoard, Reanimation* theReanimation, SaveGameContext& theContext)
 {
 	theContext.SyncReanimationDef(theReanimation->mDefinition);
 	if (theContext.mReading)
@@ -2642,7 +2946,7 @@ void SyncReanimation(Board* theBoard, Reanimation* theReanimation, SaveGameConte
 	}
 }
 
-void SyncTrail(Board* theBoard, Trail* theTrail, SaveGameContext& theContext)
+static void SyncTrail(Board* theBoard, Trail* theTrail, SaveGameContext& theContext)
 {
 	theContext.SyncTrailDef(theTrail->mDefinition);
 	if (theContext.mReading)
@@ -2660,7 +2964,7 @@ template <typename T> inline static void SyncDataArray(SaveGameContext& theConte
 }
 
 //0x4819D0
-void SyncBoard(SaveGameContext& theContext, Board* theBoard)
+static void SyncBoard(SaveGameContext& theContext, Board* theBoard)
 {
 	// TODO test if gives sane results
 	size_t offset = size_t(&theBoard->mPaused) - size_t(theBoard);
@@ -2724,175 +3028,6 @@ void SyncBoard(SaveGameContext& theContext, Board* theBoard)
 	{
 		theContext.mBuffer.WriteLong(SAVE_FILE_MAGIC_NUMBER);
 	}
-}
-
-//0x481CE0
-void FixBoardAfterLoad(Board* theBoard)
-{
-	{
-		Plant* aPlant = nullptr;
-		while (theBoard->mPlants.IterateNext(aPlant))
-		{
-			aPlant->mApp = theBoard->mApp;
-			aPlant->mBoard = theBoard;
-		}
-	}
-	{
-		Zombie* aZombie = nullptr;
-		while (theBoard->mZombies.IterateNext(aZombie))
-		{
-			aZombie->mApp = theBoard->mApp;
-			aZombie->mBoard = theBoard;
-
-			switch (aZombie->mZombieType)
-			{
-			case ZombieType::ZOMBIE_GARGANTUAR:
-			case ZombieType::ZOMBIE_REDEYE_GARGANTUAR:
-			{
-				Reanimation* aBodyReanim = theBoard->mApp->ReanimationGet(aZombie->mBodyReanimID);
-				if (aBodyReanim)
-				{
-					int aDamageIndex = aZombie->GetBodyDamageIndex();
-					if (aDamageIndex >= 1)
-					{
-						aBodyReanim->SetImageOverride("Zombie_gargantua_body1", IMAGE_REANIM_ZOMBIE_GARGANTUAR_BODY1_2);
-						aBodyReanim->SetImageOverride("Zombie_gargantuar_outerarm_lower", IMAGE_REANIM_ZOMBIE_GARGANTUAR_OUTERARM_LOWER2);
-					}
-					if (aDamageIndex >= 2)
-					{
-						aBodyReanim->SetImageOverride("Zombie_gargantua_body1", IMAGE_REANIM_ZOMBIE_GARGANTUAR_BODY1_3);
-						aBodyReanim->SetImageOverride("Zombie_gargantuar_outerleg_foot", IMAGE_REANIM_ZOMBIE_GARGANTUAR_FOOT2);
-					}
-
-					if (aZombie->mZombieType == ZombieType::ZOMBIE_REDEYE_GARGANTUAR)
-					{
-						if (aDamageIndex >= 2)
-							aBodyReanim->SetImageOverride("anim_head1", IMAGE_REANIM_ZOMBIE_GARGANTUAR_HEAD2_REDEYE);
-						else
-							aBodyReanim->SetImageOverride("anim_head1", IMAGE_REANIM_ZOMBIE_GARGANTUAR_HEAD_REDEYE);
-					}
-					else if (aDamageIndex >= 2)
-					{
-						aBodyReanim->SetImageOverride("anim_head1", IMAGE_REANIM_ZOMBIE_GARGANTUAR_HEAD2);
-					}
-				}
-				break;
-			}
-
-			case ZombieType::ZOMBIE_ZAMBONI:
-			{
-				Reanimation* aBodyReanim = theBoard->mApp->ReanimationGet(aZombie->mBodyReanimID);
-				if (aBodyReanim)
-				{
-					int aDamageIndex = aZombie->GetBodyDamageIndex();
-					if (aDamageIndex >= 1)
-					{
-						aBodyReanim->SetImageOverride("Zombie_zamboni_1", IMAGE_REANIM_ZOMBIE_ZAMBONI_1_DAMAGE1);
-						aBodyReanim->SetImageOverride("Zombie_zamboni_2", IMAGE_REANIM_ZOMBIE_ZAMBONI_2_DAMAGE1);
-					}
-					if (aDamageIndex >= 2)
-					{
-						aBodyReanim->SetImageOverride("Zombie_zamboni_1", IMAGE_REANIM_ZOMBIE_ZAMBONI_1_DAMAGE2);
-						aBodyReanim->SetImageOverride("Zombie_zamboni_2", IMAGE_REANIM_ZOMBIE_ZAMBONI_2_DAMAGE2);
-					}
-				}
-				break;
-			}
-
-			case ZombieType::ZOMBIE_CATAPULT:
-			{
-				Reanimation* aBodyReanim = theBoard->mApp->ReanimationGet(aZombie->mBodyReanimID);
-				if (aBodyReanim)
-				{
-					int aDamageIndex = aZombie->GetBodyDamageIndex();
-					if (aDamageIndex >= 1)
-					{
-						aBodyReanim->SetImageOverride("Zombie_catapult_siding", IMAGE_REANIM_ZOMBIE_CATAPULT_SIDING_DAMAGE);
-					}
-				}
-				break;
-			}
-
-			case ZombieType::ZOMBIE_BOSS:
-			{
-				Reanimation* aBodyReanim = theBoard->mApp->ReanimationGet(aZombie->mBodyReanimID);
-				if (aBodyReanim)
-				{
-					int aDamageIndex = aZombie->GetBodyDamageIndex();
-					if (aDamageIndex >= 1)
-					{
-						aBodyReanim->SetImageOverride("Boss_head", IMAGE_REANIM_ZOMBIE_BOSS_HEAD_DAMAGE1);
-						aBodyReanim->SetImageOverride("Boss_jaw", IMAGE_REANIM_ZOMBIE_BOSS_JAW_DAMAGE1);
-						aBodyReanim->SetImageOverride("Boss_outerarm_hand", IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_HAND_DAMAGE1);
-						aBodyReanim->SetImageOverride("Boss_outerarm_thumb2", IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_THUMB_DAMAGE1);
-						aBodyReanim->SetImageOverride("Boss_innerleg_foot", IMAGE_REANIM_ZOMBIE_BOSS_FOOT_DAMAGE1);
-					}
-					if (aDamageIndex >= 2)
-					{
-						aBodyReanim->SetImageOverride("Boss_head", IMAGE_REANIM_ZOMBIE_BOSS_HEAD_DAMAGE2);
-						aBodyReanim->SetImageOverride("Boss_jaw", IMAGE_REANIM_ZOMBIE_BOSS_JAW_DAMAGE2);
-						aBodyReanim->SetImageOverride("Boss_outerarm_hand", IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_HAND_DAMAGE2);
-						aBodyReanim->SetImageOverride("Boss_outerarm_thumb2", IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_THUMB_DAMAGE2);
-						aBodyReanim->SetImageOverride("Boss_outerleg_foot", IMAGE_REANIM_ZOMBIE_BOSS_FOOT_DAMAGE2);
-					}
-				}
-				break;
-			}
-
-			default:
-				break;
-			}
-		}
-	}
-	{
-		Projectile* aProjectile = nullptr;
-		while (theBoard->mProjectiles.IterateNext(aProjectile))
-		{
-			aProjectile->mApp = theBoard->mApp;
-			aProjectile->mBoard = theBoard;
-		}
-	}
-	{
-		Coin* aCoin = nullptr;
-		while (theBoard->mCoins.IterateNext(aCoin))
-		{
-			aCoin->mApp = theBoard->mApp;
-			aCoin->mBoard = theBoard;
-		}
-	}
-	{
-		LawnMower* aLawnMower = nullptr;
-		while (theBoard->mLawnMowers.IterateNext(aLawnMower))
-		{
-			aLawnMower->mApp = theBoard->mApp;
-			aLawnMower->mBoard = theBoard;
-		}
-	}
-	{
-		GridItem* aGridItem = nullptr;
-		while (theBoard->mGridItems.IterateNext(aGridItem))
-		{
-			aGridItem->mApp = theBoard->mApp;
-			aGridItem->mBoard = theBoard;
-		}
-	}
-
-	theBoard->mAdvice->mApp = theBoard->mApp;
-	theBoard->mCursorObject->mApp = theBoard->mApp;
-	theBoard->mCursorObject->mBoard = theBoard;
-	theBoard->mCursorPreview->mApp = theBoard->mApp;
-	theBoard->mCursorPreview->mBoard = theBoard;
-	theBoard->mSeedBank->mApp = theBoard->mApp;
-	theBoard->mSeedBank->mBoard = theBoard;
-	for (int i = 0; i < SEEDBANK_MAX; i++)
-	{
-		theBoard->mSeedBank->mSeedPackets[i].mApp = theBoard->mApp;
-		theBoard->mSeedBank->mSeedPackets[i].mBoard = theBoard;
-	}
-	theBoard->mChallenge->mApp = theBoard->mApp;
-	theBoard->mChallenge->mBoard = theBoard;
-	theBoard->mApp->mMusic->mApp = theBoard->mApp;
-	theBoard->mApp->mMusic->mMusicInterface = theBoard->mApp->mMusicInterface;
 }
 
 //0x481FE0
@@ -2969,20 +3104,4 @@ bool LawnSaveGame(Board* theBoard, const std::string& theFilePath)
 	memcpy(aOutBuffer.data() + sizeof(aHeader), aPayload.data(), aPayload.size());
 
 	return gSexyAppBase->WriteBytesToFile(theFilePath, aOutBuffer.data(), static_cast<int>(aOutBuffer.size()));
-}
-
-bool LawnSaveGameLegacy(Board* theBoard, const std::string& theFilePath)
-{
-	SaveGameContext aContext;
-	aContext.mFailed = false;
-	aContext.mReading = false;
-
-	SaveFileHeader aHeader;
-	aHeader.mMagicNumber = SAVE_FILE_MAGIC_NUMBER;
-	aHeader.mBuildVersion = SAVE_FILE_VERSION;
-	aHeader.mBuildDate = SAVE_FILE_DATE;
-
-	aContext.SyncBytes(&aHeader, sizeof(aHeader));
-	SyncBoard(aContext, theBoard);
-	return gSexyAppBase->WriteBufferToFile(theFilePath, &aContext.mBuffer);
 }

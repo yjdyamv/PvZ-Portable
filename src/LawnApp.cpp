@@ -484,6 +484,10 @@ bool LawnApp::TryLoadGame()
 		MakeNewBoard();
 		if (mBoard->LoadGame(aLegacySaveName))
 		{
+			if (LawnSaveGame(mBoard, aSaveName))
+			{
+				EraseFile(aLegacySaveName);
+			}
 			mFirstTimeGameSelector = false;
 			mBoardResult = BoardResult::BOARDRESULT_NONE;
 			DoContinueDialog();

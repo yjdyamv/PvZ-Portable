@@ -203,12 +203,13 @@ PvZ-Portable uses two distinct types of save data:
     *   **Fully compatible** with the original PC game format.
     *   Already portable by design (uses explicit serialization).
 
-2.  **Mid-Level Save States** (`game1_0.v4` and `game1_0.dat`, etc.):
+2.  **Mid-Level Save States** (`game1_0.v4`, etc. legacy `game1_0.dat`, etc.):
     *   Stores the exact state of a level when "Save and Exit" is used (zombies, projectiles, plants, etc.).
-    *   The game generates **two files** for each save:
+    *   The game now writes **only** `*.v4` files by default:
         *   `*.v4` files: **Portable format**. Sharing these files to transfer progress between different platforms is fully **supported**.
-        *   `*.dat` files: **Legacy dump**. Contains raw memory dumps. **Do not share this file** across platforms as it will cause crashes due to architecture differences.
-    *   When loading, the game **prefers** the `.v4` file if available.
+        *   `*.dat` files: **Legacy dump** from old versions. Contains raw memory dumps. **Do not share this file** across platforms as it will cause crashes due to architecture differences.
+    *   When loading, the game **prefers** `.v4`; `*.dat` is fallback-only for migration compatibility.
+    *   If a save is loaded from legacy `*.dat`, the game automatically re-saves it to `*.v4` and removes the legacy `*.dat` after successful migration.
 
 ### Why a new mid-level save format?
 
