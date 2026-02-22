@@ -383,6 +383,9 @@ void Music::MusicResync()
 //0x45B240
 void Music::StartBurst()
 { 
+	// No burst in intro
+	if (mApp->mGameMode == GameMode::GAMEMODE_INTRO)
+		return;
 	if (mMusicBurstState == MusicBurstState::MUSIC_BURST_OFF)
 	{ 
 		mMusicBurstState = MusicBurstState::MUSIC_BURST_STARTING;
