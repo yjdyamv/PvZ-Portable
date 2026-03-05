@@ -106,8 +106,7 @@ SexyAppBase::SexyAppBase()
 	mResourceDir = "sdmc:/switch/PvZPortable/";
 #elif defined(__3DS__)
 	mResourceDir = "sdmc:/3ds/PvZPortable/";
-#elif defined(__ANDROID__)
-	// On Android, use external storage so that users can copy game resources via a file manager
+#elif defined(__ANDROID__) && !defined(__TERMUX__)
 	const char* aExtPath = SDL_AndroidGetExternalStoragePath();
 	if (aExtPath)
 	{
@@ -3061,21 +3060,21 @@ void SexyAppBase::Init()
 
 	InitPropertiesHook();
 
-#if !defined(__SWITCH__) && !defined(__3DS__) && !defined(__ANDROID__)
-	char* aPrefPath = SDL_GetPrefPath("io.github.wszqkzqk", "PvZPortable"); // Avoid conflict with official Plants vs. Zombies
-	if (aPrefPath)
-	{
-		SetAppDataFolder(aPrefPath);
-		SDL_free(aPrefPath);
-	}
-#elif defined(__ANDROID__)
-	// On Android, store save data under the same external files directory as resources,
-	// so that users can easily import/export saves via a file manager.
+#if defined(__ANDROID__) && !defined(__TERMUX__)
 	{
 		const char* aExtPath = SDL_AndroidGetExternalStoragePath();
 		if (aExtPath)
 		{
 			SetAppDataFolder(std::string(aExtPath) + "/");
+		}
+	}
+#elif !defined(__SWITCH__) && !defined(__3DS__)
+	{
+		char* aPrefPath = SDL_GetPrefPath("io.github.wszqkzqk", "PvZPortable"); // Avoid conflict with official Plants vs. Zombies
+		if (aPrefPath)
+		{
+			SetAppDataFolder(aPrefPath);
+			SDL_free(aPrefPath);
 		}
 	}
 #endif

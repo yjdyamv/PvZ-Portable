@@ -36,7 +36,7 @@
 #include <switch.h>
 #elif defined(__3DS__)
 #include <3ds.h>
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) && !defined(__TERMUX__)
 #include <android/log.h>
 #endif
 
@@ -67,7 +67,7 @@ void Sexy::PrintF(const char *text, ...)
 
 #if defined(__SWITCH__) || defined(__3DS__)
 	svcOutputDebugString(buffer.c_str(), buffer.size());
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) && !defined(__TERMUX__)
 	__android_log_write(ANDROID_LOG_INFO, "PvZPortable", buffer.c_str());
 #endif
 
