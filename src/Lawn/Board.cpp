@@ -4515,6 +4515,7 @@ void Board::PickUpTool(GameObjectType theObjectType)
 		if (mApp->mPlayerInfo->mPurchases[StoreItem::STORE_ITEM_FERTILIZER] > PURCHASE_COUNT_OFFSET)
 		{
 			mCursorObject->mCursorType = CursorType::CURSOR_TYPE_FERTILIZER;
+			mApp->PlayFoley(FoleyType::FOLEY_DROP);
 		}
 		else
 		{
@@ -4526,6 +4527,7 @@ void Board::PickUpTool(GameObjectType theObjectType)
 		if (mApp->mPlayerInfo->mPurchases[StoreItem::STORE_ITEM_BUG_SPRAY] > PURCHASE_COUNT_OFFSET)
 		{
 			mCursorObject->mCursorType = CursorType::CURSOR_TYPE_BUG_SPRAY;
+			mApp->PlayFoley(FoleyType::FOLEY_DROP);
 		}
 		else
 		{
@@ -4542,6 +4544,7 @@ void Board::PickUpTool(GameObjectType theObjectType)
 		if (mApp->mPlayerInfo->mPurchases[StoreItem::STORE_ITEM_CHOCOLATE] > PURCHASE_COUNT_OFFSET)
 		{
 			mCursorObject->mCursorType = CursorType::CURSOR_TYPE_CHOCOLATE;
+			mApp->PlayFoley(FoleyType::FOLEY_DROP);
 		}
 		else
 		{
@@ -4570,6 +4573,7 @@ void Board::PickUpTool(GameObjectType theObjectType)
 			if (mApp->mPlayerInfo->mPurchases[StoreItem::STORE_ITEM_TREE_FOOD] > PURCHASE_COUNT_OFFSET)
 			{
 				mCursorObject->mCursorType = CursorType::CURSOR_TYPE_TREE_FOOD;
+				mApp->PlayFoley(FoleyType::FOLEY_DROP);
 			}
 			else
 			{

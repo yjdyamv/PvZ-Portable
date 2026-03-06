@@ -5680,7 +5680,7 @@ int Challenge::TreeOfWisdomHitTest(int theX, int theY, HitResult* theHitResult)
 {
 	Rect aTreeRect;
 	int aTreeSize = TreeOfWisdomGetSize();
-	if (aTreeSize <= 1)			aTreeRect = Rect(310, 175, 275, 175);
+	if (aTreeSize <= 1)			aTreeRect = Rect(310, 275, 175, 175);
 	else if (aTreeSize < 7)		aTreeRect = Rect(290, 255, 205, 195);
 	else if (aTreeSize < 12)	aTreeRect = Rect(290, 215, 205, 225);
 	else						aTreeRect = Rect(280, 155, 225, 305);
