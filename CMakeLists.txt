@@ -301,5 +301,7 @@ elseif (IOS)
 	# Add asset catalog (app icon)
 	if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ios/Assets.xcassets")
 		target_sources(pvz-portable PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/ios/Assets.xcassets")
+		set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/ios/Assets.xcassets"
+			PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 	endif()
 endif()
