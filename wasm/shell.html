@@ -116,8 +116,11 @@ body.game-mode {
 }
 #upload-save-actions button:hover { background: rgba(78,204,163,0.12); }
 #upload-save-actions button:disabled { opacity: 0.4; cursor: default; }
-#canvas-container { display: none; width: 100vw; height: 100vh; position: relative;
-    justify-content: center; align-items: center; background: #000; }
+#canvas-container { display: none; width: 100vw; height: 100vh; position: fixed; inset: 0;
+    justify-content: center; align-items: center; background: #000; overflow: hidden; }
+#canvas-container:fullscreen {
+    width: 100%; height: 100%;
+}
 canvas#canvas {
     display: block;
     background: #000; outline: none;
@@ -261,6 +264,8 @@ const uploadSaveClearBtn = document.getElementById('upload-save-clear-btn');
 const uploadSaveImportInput = document.getElementById('upload-save-import-input');
 const uploadSaveImportDirInput = document.getElementById('upload-save-import-dir-input');
 const reselectLink = document.getElementById('reselect-link');
+
+let runtimeReloadScheduled = false;
 
 dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
@@ -429,6 +434,8 @@ function resizeCanvas() {
     canvas.style.width  = Math.floor(canvas.width  * scale) + 'px';
     canvas.style.height = Math.floor(canvas.height * scale) + 'px';
 }
+
+window.addEventListener('fullscreenchange', resizeCanvas);
 
 function canSyncSaves() {
     return savesMounted && Module.FS && typeof Module.FS.syncfs === 'function';
@@ -740,6 +747,38 @@ window.addEventListener('beforeunload', e => {
         e.returnValue = 'Recent save data may still be syncing. Wait a moment or export saves before leaving.';
     }
 });
+
+window.onGameExit = function() {
+    gameStarted = false;
+    if (saveSyncIntervalId !== null) {
+        clearInterval(saveSyncIntervalId);
+        saveSyncIntervalId = null;
+    }
+    if (document.fullscreenElement) {
+        document.exitFullscreen().catch(function() {});
+    }
+    document.getElementById('canvas-container').style.display = 'none';
+    document.getElementById('upload-screen').style.display = '';
+    document.body.classList.remove('game-mode');
+    document.body.classList.add('upload-mode');
+    window.removeEventListener('resize', resizeCanvas);
+    // Restore drop-zone to 'ready' state so the user can re-launch.
+    dropZone.classList.remove('loading');
+    dropZone.style.pointerEvents = '';
+    loadStatus.style.display = 'none';
+    collectedFiles.clear();
+    fileInput.value = '';
+    resourceZipInput.value = '';
+    refreshUI();
+
+    if (runtimeReloadScheduled) return;
+    runtimeReloadScheduled = true;
+    loadStatus.textContent = 'Resetting WebAssembly runtime…';
+    loadStatus.classList.remove('has-error');
+    loadStatus.style.display = 'block';
+
+    window.setTimeout(() => window.location.reload(), 0);
+};
 </script>
 </body>
 </html>

@@ -45,6 +45,7 @@
 #include <3ds.h>
 #elif defined(__EMSCRIPTEN__)
 #include <emscripten.h>
+#include <emscripten/html5.h>
 #endif
 
 #include "SexyAppBase.h"
@@ -89,8 +90,16 @@ static bool gScreenSaverActive = false;
 #define SPI_GETSCREENSAVERRUNNING 114
 #endif
 
-
 static GLImage* gFPSImage = nullptr;
+
+#ifdef __EMSCRIPTEN__
+static void EmscriptenDeferredDoExit(void* arg)
+{
+	SexyAppBase* app = static_cast<SexyAppBase*>(arg);
+	if (app != nullptr)
+		app->Shutdown();
+}
+#endif
 
 SexyAppBase::SexyAppBase()
 {
@@ -1454,6 +1463,8 @@ void SexyAppBase::Shutdown()
 			WriteToRegistry();
 
 #ifdef __EMSCRIPTEN__
+		// Exit browser fullscreen so the shell page returns to normal layout.
+		emscripten_exit_fullscreen();
 		EM_ASM(
 			if (typeof FS !== 'undefined' && FS.syncfs) {
 				FS.syncfs(false, function(err) {
@@ -1474,7 +1485,20 @@ void SexyAppBase::DoExit(int theCode)
 {
 	RestoreScreenResolution();
 
-#if (defined(__ANDROID__) && !defined(__TERMUX__)) || defined(__IPHONEOS__)
+#if defined(__EMSCRIPTEN__)
+	if (mRunning)
+	{
+		emscripten_async_call(EmscriptenDeferredDoExit, this, 0);
+	}
+	else
+	{
+		Shutdown();
+		EM_ASM(
+			if (typeof window.onGameExit === 'function') window.onGameExit();
+		);
+	}
+	(void)theCode;
+#elif (defined(__ANDROID__) && !defined(__TERMUX__)) || defined(__IPHONEOS__)
 	Shutdown();
 #else
 	exit(theCode);
@@ -2198,8 +2222,8 @@ void SexyAppBase::StartCursorThread()
 
 void SexyAppBase::SwitchScreenMode(bool wantWindowed, bool is3d, bool force)
 {
-#if defined(__IPHONEOS__) || (defined(__ANDROID__) && !defined(__TERMUX__)) || defined(__SWITCH__) || defined(__3DS__) || defined(__EMSCRIPTEN__)
-	// Mobile/console/web platforms are always fullscreen; skip mode switching entirely.
+#if defined(__IPHONEOS__) || (defined(__ANDROID__) && !defined(__TERMUX__)) || defined(__SWITCH__) || defined(__3DS__)
+	// Mobile/console platforms are always fullscreen; skip mode switching entirely.
 	Set3DAcclerated(is3d);
 	return;
 #endif
@@ -2587,6 +2611,11 @@ bool SexyAppBase::Process(bool allowSleep)
 void SexyAppBase::EmscriptenMainLoopCallback()
 {
 	SexyAppBase* app = Sexy::gSexyAppBase;
+	if (app->mWindow != nullptr && app->mGLInterface != nullptr)
+	{
+		app->mGLInterface->UpdateViewport();
+		app->mWidgetManager->Resize(app->mScreenBounds, app->mGLInterface->mPresentationRect);
+	}
 	if (app->mShutdown)
 	{
 		emscripten_cancel_main_loop();
@@ -2596,7 +2625,10 @@ void SexyAppBase::EmscriptenMainLoopCallback()
 			if (typeof FS !== 'undefined' && FS.syncfs) {
 				FS.syncfs(false, function(err) {
 					if (err) console.warn('IDBFS sync error:', err);
+					if (typeof window.onGameExit === 'function') window.onGameExit();
 				});
+			} else {
+				if (typeof window.onGameExit === 'function') window.onGameExit();
 			}
 		);
 		return;

@@ -1988,10 +1988,7 @@ void LawnApp::ButtonDepress(int theId)
 			// Android should move the task to the background instead of forcing a quit.
 			SDL_MinimizeWindow(static_cast<SDL_Window*>(mWindow));
 #elif !defined(__IPHONEOS__) // iOS apps must not quit or programmatically return to the Home screen.
-			{
-				SDL_Event event = {.quit={SDL_QUIT, SDL_GetTicks()}};
-				SDL_PushEvent(&event);
-			}
+			CloseRequestAsync();
 #endif
 			return;
 
@@ -2388,6 +2385,16 @@ PottedPlant* LawnApp::GetPottedPlantByIndex(int thePottedPlantIndex)
 {
 	TOD_ASSERT(thePottedPlantIndex >= 0 && thePottedPlantIndex < mPlayerInfo->mNumPottedPlants);
 	return &mPlayerInfo->mPottedPlant[thePottedPlantIndex];
+}
+
+bool LawnApp::UpdateAppStep(bool* updated)
+{
+	if (mCloseRequest)
+	{
+		Shutdown();
+		return false;
+	}
+	return SexyAppBase::UpdateAppStep(updated);
 }
 
 //0x453A50

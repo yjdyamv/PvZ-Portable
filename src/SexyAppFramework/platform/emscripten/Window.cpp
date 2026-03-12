@@ -23,6 +23,8 @@
  */
 
 #include <SDL.h>
+#include <emscripten.h>
+#include <emscripten/html5.h>
 
 #include "SexyAppBase.h"
 #include "graphics/GLInterface.h"
@@ -35,7 +37,11 @@ void SexyAppBase::MakeWindow()
 {
 	if (mWindow)
 	{
-		SDL_SetWindowFullscreen((SDL_Window*)mWindow, (!mIsWindowed ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
+		// Use the browser Fullscreen API; SDL_SetWindowFullscreen has no effect on Emscripten.
+		if (!mIsWindowed)
+			emscripten_request_fullscreen("#canvas-container", EM_FALSE);
+		else
+			emscripten_exit_fullscreen();
 	}
 	else
 	{
