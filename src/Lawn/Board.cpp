@@ -4890,6 +4890,11 @@ void Board::Pause(bool thePause)
 		mApp->mSoundSystem->GamePause(thePause);
 		mApp->mMusic->GameMusicPause(thePause);
 	}
+
+	if (thePause && NeedSaveGame())
+	{
+		TryToSaveGame();
+	}
 }
 
 //0x412850
