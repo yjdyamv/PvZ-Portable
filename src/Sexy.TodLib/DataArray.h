@@ -158,12 +158,12 @@ public:
 		}
 
 		DataArray<T>::DataArrayItem* aNewItem = &mBlock[aNext];
-		memset(static_cast<void*>(&aNewItem->mItem), 0, sizeof(T));
-		new (&aNewItem->mItem) T{};
+		memset(aNewItem, 0, sizeof(DataArrayItem));
 		aNewItem->mID = (mNextKey++ << DATA_ARRAY_KEY_SHIFT) | aNext;
 		if (mNextKey == DATA_ARRAY_MAX_SIZE) mNextKey = 1;
 		mSize++;
 
+		new (aNewItem)T();
 		return reinterpret_cast<T*>(aNewItem);
 	}
 

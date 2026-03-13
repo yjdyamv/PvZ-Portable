@@ -32,16 +32,12 @@ TrailParams gLawnTrailArray[TrailType::NUM_TRAILS] = { //0x6A19F4
 };
 
 TrailDefinition::TrailDefinition()
-	: mImage(nullptr),
-	  mMaxPoints(2),
-	  mMinPointDistance(1.0f),
-	  mTrailFlags(0),
-	  mTrailDuration{},
-	  mWidthOverLength{},
-	  mWidthOverTime{},
-	  mAlphaOverLength{},
-	  mAlphaOverTime{}
 {
+	memset(this, 0, sizeof(TrailDefinition));
+	mMinPointDistance = 1.0f;
+	mMaxPoints = 2;
+	mTrailFlags = 0U;
+	mImage = nullptr;
 }
 
 TrailDefinition::~TrailDefinition()

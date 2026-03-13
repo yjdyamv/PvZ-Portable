@@ -276,7 +276,7 @@ void PlayerInfo::ResetChallengeRecord(GameMode theGameMode)
 //0x469A00
 void PottedPlant::InitializePottedPlant(SeedType theSeedType)
 {
-	*this = PottedPlant{};
+	memset(this, 0, sizeof(PottedPlant));
 	mSeedType = theSeedType;
 	mDrawVariation = DrawVariation::VARIATION_NORMAL;
 	mLastWateredTime = 0;
